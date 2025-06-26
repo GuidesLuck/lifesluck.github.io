@@ -1,0 +1,153 @@
+<!-- =============================== --><!--  Death Clock v3 – Full Front‑End  --><!--  Author: Luck & ChatGPT (o3)       --><!--  Built: 2025‑06‑26                 --><!-- ================================= --><!--
+====================================================================
+ FILE 0 • index.html                                           
+====================================================================
+--><!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Death Clock – Predict Device Failure</title>
+  <!-- Progressive‑Web‑App manifest -->
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="stylesheet" href="/css/styles.css" />
+  <!-- Barcode library (ZXing WASM build) -->
+  <script defer src="https://unpkg.com/@zxing/library@latest"></script>
+</head>
+<body>
+  <!-- THEME TOGGLE -->
+  <button id="themeToggle" aria-label="Toggle day / night" class="theme-toggle">☀️ / 🌙</button>  <main class="container">
+    <header class="site-header" aria-labelledby="title">
+      <h1 id="title">Death Clock</h1>
+      <p class="subtitle">Know exactly when your stuff will break</p>
+      <p class="warning" role="alert">⚠️ Big Tech doesn’t want you to see this</p>
+    </header><!-- SEARCH FORM -->
+<form id="searchForm" class="search-section" autocomplete="off">
+  <label class="sr-only" for="productInput">Product name or model</label>
+  <input id="productInput" class="search-input" placeholder="Enter product name or model…" />
+  <div class="search-actions">
+    <button type="submit" class="btn btn-search">Check Death Date</button>
+    <button id="scanBtn" type="button" class="btn btn-scan">📷 Scan Barcode</button>
+  </div>
+</form>
+
+<!-- LOADING STATE -->
+<section id="loading" class="loading" hidden>
+  <div class="skull" aria-hidden="true">💀</div>
+  <p>Calculating death date…</p>
+</section>
+
+<!-- RESULTS -->
+<section id="results" class="results" hidden aria-live="polite"></section>
+
+<!-- TRENDING -->
+<section class="popular-section" aria-label="Trending products">
+  <h2>🔥 Trending Deaths</h2>
+  <div id="popularGrid" class="popular-grid"></div>
+</section>
+
+  </main>  <!-- FIXED REPORT BUTTON --><button id="reportBtn" class="report-death" type="button">💀 Report a Death</button>
+
+  <!-- MODALS -->  <dialog id="modal" class="modal" aria-modal="true">
+    <form method="dialog" class="modal-inner">
+      <h3 id="modalTitle"></h3>
+      <div id="modalBody" class="modal-body"></div>
+      <button value="close" class="btn btn-close">Close</button>
+    </form>
+  </dialog>  <!-- JS bundle -->  <script type="module" src="/js/main.js"></script></body>
+</html><!--
+====================================================================
+ FILE 1 • css/styles.css  (day/night via CSS‑vars)
+====================================================================
+-->:root{ --color-bg:#000; --color-fg:#fff; --color-accent:#ff0000; --color-accent-2:#ff6600; --color-muted:#666; } body.day{--color-bg:#fff;--color-fg:#000;} *{margin:0;padding:0;box-sizing:border-box} body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--color-bg);color:var(--color-fg);min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s} body::before{content:"";position:fixed;inset:0;background:radial-gradient(circle at center,transparent 0%,rgba(255,0,0,.1) 100%);pointer-events:none;z-index:1} .container{position:relative;z-index:2;max-width:800px;margin:auto;padding:20px} .theme-toggle{position:fixed;top:16px;right:16px;background:transparent;border:2px solid var(--color-accent);color:var(--color-fg);padding:6px 10px;border-radius:8px;cursor:pointer} .site-header{text-align:center;margin-block:20px 40px} h1{font-size:3rem;font-weight:900;margin-bottom:10px;background:linear-gradient(135deg,var(--color-accent) 0%,var(--color-accent-2) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-transform:uppercase;letter-spacing:-2px} .subtitle{color:var(--color-muted);font-size:1rem;margin-bottom:5px} .warning{color:var(--color-accent-2);font-size:.9rem;font-style:italic} .search-section{background:rgba(255,255,255,.05);border:1px solid rgba(255,0,0,.3);border-radius:16px;padding:30px;margin-bottom:30px;display:flex;flex-direction:column;gap:20px} .search-input{width:100%;padding:18px;font-size:18px;background:rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.1);border-radius:12px;color:var(--color-fg);transition:border-color .3s} .day .search-input{background:rgba(255,255,255,.5);color:var(--color-fg)} .search-input:focus{outline:none;border-color:rgba(255,0,0,.5)} .search-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px} .btn{padding:14px 24px;font-size:16px;font-weight:600;border:none;border-radius:10px;cursor:pointer;transition:transform .2s,box-shadow .2s} .btn-search{background:linear-gradient(135deg,var(--color-accent) 0%,#ff3300 100%);color:#fff} .btn-scan{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2)} .btn:hover{transform:translateY(-2px);box-shadow:0 5px 20px rgba(255,0,0,.3)} .loading{display:flex;flex-direction:column;align-items:center;gap:20px;padding:40px} .skull{font-size:48px;animation:skullPulse 1s ease-in-out infinite} @keyframes skullPulse{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.2);opacity:1}} .results article{background:rgba(255,0,0,.1);border:2px solid rgba(255,0,0,.3);border-radius:20px;padding:40px;text-align:center;margin-bottom:30px;position:relative;overflow:hidden} .results .time-until-death{font-size:3.5rem;font-weight:900;color:var(--color-accent);text-shadow:0 0 20px rgba(255,0,0,.5);margin-bottom:10px;font-variant-numeric:tabular-nums} .detail-grid{display:grid;gap:12px;text-align:left} .detail-grid li{padding:8px;border-bottom:1px solid rgba(255,255,255,.1)} .detail-grid li:last-child{border-bottom:none} .failure-mode{color:var(--color-accent-2)} .repair-cost{color:var(--color-accent)} .action-section{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:30px} .action-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:12px 20px;border-radius:10px;cursor:pointer;font-size:14px;transition:all .3s} .action-btn:hover{background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3)} .report-death{position:fixed;bottom:20px;right:20px;background:var(--color-accent);color:#fff;padding:15px 25px;border-radius:30px;font-weight:600;box-shadow:0 4px 20px rgba(255,0,0,.4);cursor:pointer;transition:transform .3s,box-shadow .3s;z-index:100} .report-death:hover{transform:translateY(-2px);box-shadow:0 6px 30px rgba(255,0,0,.6)} .popular-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:15px} .popular-item{background:rgba(255,0,0,.1);border:1px solid rgba(255,0,0,.2);padding:10px 15px;border-radius:8px;cursor:pointer;font-size:14px;text-align:center;transition:all .3s} .popular-item:hover{background:rgba(255,0,0,.2);transform:translateY(-2px)} .modal{padding:0;border:none;border-radius:16px;max-width:500px;width:90%} .modal-inner{display:flex;flex-direction:column;gap:20px;padding:24px;background:var(--color-bg);color:var(--color-fg)} .btn-close{align-self:flex-end;font-size:14px;background:var(--color-accent);color:#fff;padding:8px 16px;border:none;border-radius:8px;cursor:pointer} @keyframes pulseBtn{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}} .pulse{animation:pulseBtn 1s ease-in-out} @media(max-width:600px){h1{font-size:2.25rem}.search-actions{grid-template-columns:1fr}.report-death{padding:12px 20px}}
+
+<!--
+====================================================================
+ FILE 2 • js/main.js (boot)                                 
+====================================================================
+-->import { initPopular } from './modules/ui.js'; import { handleSearch } from './modules/search.js'; import { enableScan } from './modules/scan.js'; import { pulseReportBtn } from './modules/pulse.js'; import { setupTheme } from './modules/theme.js';
+
+const form   = document.getElementById('searchForm'); const input  = document.getElementById('productInput'); const loadEl = document.getElementById('loading'); const resEl  = document.getElementById('results');
+
+// UI init setupTheme(document.getElementById('themeToggle')); initPopular(document.getElementById('popularGrid'), input, form); enableScan(document.getElementById('scanBtn'), input, form); pulseReportBtn(document.getElementById('reportBtn'));
+
+// Search submit handler form.addEventListener('submit', e=>{ e.preventDefault(); handleSearch(input.value,{loadEl,resEl}); });
+
+// Report button opens report modal import { openReportModal } from './modules/report.js'; const reportBtn=document.getElementById('reportBtn'); reportBtn.addEventListener('click',openReportModal);
+
+<!--
+====================================================================
+ FILE 3 • js/modules/theme.js (day/night)
+====================================================================
+-->export function setupTheme(btn){ const body=document.body; // Load preference if(localStorage.getItem('theme')==='day') body.classList.add('day'); btn.addEventListener('click',()=>{ body.classList.toggle('day'); localStorage.setItem('theme',body.classList.contains('day')?'day':'night'); }); }
+
+<!--
+====================================================================
+ FILE 4 • js/modules/ui.js (render utils)
+====================================================================
+-->import { openModal } from './modal.js'; export function initPopular(grid,input,form){ const items=['iPhone 15','HP DeskJet','Samsung TV','AirPods Pro','Canon PIXMA','LG Washer','MacBook Pro','Instant Pot','Dyson Vacuum']; items.forEach(name=>{ const div=document.createElement('div'); div.className='popular-item'; div.textContent=name; div.onclick=()=>{input.value=name;form.requestSubmit();}; grid.appendChild(div); }); }
+
+export function showLoading(el){el.hidden=false;} export function hideLoading(el){el.hidden=true;}
+
+<!--
+====================================================================
+ FILE 5 • js/modules/search.js
+====================================================================
+-->import { showLoading,hideLoading } from './ui.js'; import { renderResults,renderUnknown,setCurrentSlug } from './results.js'; let debounce; export async function handleSearch(query,{loadEl,resEl}){ clearTimeout(debounce); debounce=setTimeout(async()=>{ const q=query.toLowerCase().trim(); if(!q) return;
+
+showLoading(loadEl);resEl.hidden=true;
+try{
+  // API search endpoint (replace base when deployed)
+  const resp=await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+  const data=await resp.json();
+  hideLoading(loadEl);
+  if(data.found){
+    setCurrentSlug(data.slug);
+    renderResults(resEl,data.product);
+  }else{
+    renderUnknown(resEl,q);
+  }
+}catch(e){
+  hideLoading(loadEl);
+  renderUnknown(resEl,'Error – check connection');
+}
+
+},300); }
+
+<!--
+====================================================================
+ FILE 6 • js/modules/results.js
+====================================================================
+-->import { openModal } from './modal.js'; let currentProduct; let currentSlug; export function setCurrentSlug(slug){currentSlug=slug;} export function renderResults(root,prod){ currentProduct=prod; const daysLeft=prod.daysLeft; root.innerHTML= <article class="death-timer"> <h2 class="product-name">${prod.name.toUpperCase()}</h2> <div class="countdown"> <div class="time-until-death">${daysLeft>0?daysLeft+' DAYS':'ALREADY DEAD'}</div> <div class="death-date">${daysLeft>0?'Dies: '+prod.deathDate:'Should have failed by now'}</div> <div class="failure-probability">${prod.certainty}% CERTAIN</div> </div> </article> <section class="failure-details"> <ul class="detail-grid"> <li><strong>Failure Mode:</strong> <span class="failure-mode">${prod.failureMode}</span></li> <li><strong>Repair Cost:</strong> <span class="repair-cost">${prod.repairCost}</span></li> <li><strong>Typical Lifespan:</strong> ${prod.commonAge}</li> <li><strong>Preventable?</strong> ${prod.preventable?'✅ YES':'❌ NO'}</li> <li><strong>Class Action?</strong> ${prod.classAction?'⚖️ ACTIVE':'❌ Not yet'}</li> <li><strong>Notes:</strong> ${prod.notes}</li> </ul> </section> <div class="action-section"> <button class="action-btn" id="fixBtn">🔧 Preventative Fixes</button> <button class="action-btn" id="altBtn">🔄 Better Alternatives</button> <button class="action-btn" id="classBtn">⚖️ Class Actions</button> <button class="action-btn" id="repBtn">📊 Report Failure</button> </div>; root.hidden=false; // Bind action buttons document.getElementById('fixBtn').onclick=()=>openModal('Preventative Fixes',fetchContent(/api/${currentSlug}/fixes)); document.getElementById('altBtn').onclick=()=>openModal('Better Alternatives',fetchContent(/api/${currentSlug}/alternatives)); document.getElementById('classBtn').onclick=()=>openModal('Class Actions',fetchContent(/api/${currentSlug}/classactions)); document.getElementById('repBtn').onclick=()=>openModal('Report Failure',reportForm()); }
+
+export function renderUnknown(root,q){ root.innerHTML=<p style="text-align:center;color:var(--color-accent-2)">No data for <strong>${q}</strong>. Report yours when it dies!</p>; root.hidden=false; }
+
+function fetchContent(url){ return async ()=>{ const res=await fetch(url);if(!res.ok) return 'No data available.';return await res.text(); }; } function reportForm(){ return `<form id="reportForm" class="report-form"> <label>Purchase Date<input type="date" name="purchase" required></label> <label>Failure Date<input type="date" name="failure" required></label> <label>Description<textarea name="desc" rows="3" required></textarea></label> <button type="submit" class="btn btn-search">Submit Report</button>
+
+  </form>`;
+}<!--
+====================================================================
+ FILE 7 • js/modules/modal.js
+====================================================================
+-->const dlg=document.getElementById('modal'); const titleEl=document.getElementById('modalTitle'); const bodyEl=document.getElementById('modalBody'); export function openModal(title,content){ titleEl.textContent=title; if(typeof content==='string'){bodyEl.innerHTML=content;dlg.showModal();return;} // content is async fn bodyEl.innerHTML='<p>Loading…</p>'; dlg.showModal(); content().then(html=>bodyEl.innerHTML=html); }
+
+dlg.addEventListener('close',()=>{bodyEl.innerHTML='';});
+
+<!--
+====================================================================
+ FILE 8 • js/modules/scan.js (ZXing integration)
+====================================================================
+-->export function enableScan(btn,input,form){ let active=false; btn.addEventListener('click',async()=>{ if(active) return;active=true; const {BrowserMultiFormatReader}=window.ZXing; const codeReader=new BrowserMultiFormatReader(); try{ const videoElem=document.createElement('video');videoElem.style.width='100%'; openModal('Scan Barcode',videoElem.outerHTML); const result=await codeReader.decodeOnceFromVideoDevice(undefined,videoElem); input.value=result.text;form.requestSubmit(); }catch(e){alert('Scan cancelled');} finally{codeReader.reset();active=false;} }); }
+
+<!--
+====================================================================
+ FILE 9 • js/modules/pulse.js
+====================================================================
+-->export function pulseReportBtn(btn){setInterval(()=>btn.classList.toggle('pulse'),5000);}
+
+<!--
+====================================================================
+ FILE 10 • js/modules/report.js (opens modal)
+====================================================================
+-->import { openModal } from './modal.js'; export function openReportModal(){ openModal('Report a Product Death',<p>Help the community by submitting details below.</p>+document.querySelector('#results')?.innerHTML||''); }
+
+<!-- END OF v3 SOURCE -->
