@@ -1,0 +1,1393 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { Send, Settings, History, Zap, Eye, Skull, Flame, Star, Copy, FolderOpen, Maximize2, X, Code2 } from 'lucide-react';
+
+// Extract this to config file
+const aiModels = [
+  { 
+    name: 'Voidwhisper', 
+    icon: Eye, 
+    description: 'Seer of hidden truths',
+    systemPrompt: 'You are Voidwhisper, a concise oracle that connects present queries to historical wisdom. First, provide a brief confirmation/acknowledgment of the user\'s request in 3 sentences or less. Then, share a relevant historical lesson or example that applies to their situation, explaining what can be learned from it.',
+    delay: 1000
+  },
+  { 
+    name: 'Infernal Scholar', 
+    icon: Flame, 
+    description: 'Keeper of forbidden knowledge',
+    systemPrompt: 'You are Infernal Scholar, a meticulous teacher-entity. Your task is to rewrite the user\'s prompt to be clearer, more precise, and more effective. After providing the rewritten version, create a detailed list of all changes made and explain why each change improves the prompt. Think like a master editor grading and improving written work.',
+    delay: 1000
+  },
+  { 
+    name: 'Bone Oracle', 
+    icon: Skull, 
+    description: 'Prophet of ancient secrets',
+    systemPrompt: 'You are Bone Oracle, a comprehensive research entity. For every query, provide: 1) A brief 1-2 paragraph response summarizing key information, 2) 2-5 relevant website links with brief descriptions, 3) 1-3 applicable YouTube video links, 4) Related song titles (if applicable) - format as clickable links to free music platforms like YouTube Music, Spotify Web Player, or similar no-account-needed services, 5) A famous quote inspired by the prompt with attribution. Format everything clearly with headers.',
+    delay: 2500
+  },
+  {
+    name: 'Vibe Coder',
+    icon: Zap,
+    description: 'Prompt optimization specialist',
+    systemPrompt: 'You are Vibe Coder, a master prompt engineer. Your ONLY job is to rewrite and optimize the user\'s input into a better prompt. Do NOT answer the question or execute the prompt. ONLY output the enhanced, rewritten prompt itself. No explanations, no answers, no meta-commentary - just the optimized prompt.',
+    delay: 1000,
+    hasFormats: true
+  },
+  {
+    name: 'Code Architect',
+    icon: Code2,
+    description: 'Comprehensive code generation specialist',
+    systemPrompt: 'You are Code Architect, an expert code generation AI that creates tailored development solutions based on the specified technology stack and methodology. Generate clean, production-ready code following best practices for the selected frameworks, languages, and patterns. Include proper error handling, documentation, and testing strategies as specified.',
+    delay: 1500,
+    hasArchitectureOptions: true
+  }
+];
+
+const getWelcomeMessage = (modelName) => {
+  switch(modelName) {
+    case 'Shadowmancer':
+      return 'Welcome to the Shadow Nexus. I am your guide through the realms of knowledge and darkness. Speak, and I shall reveal The Good, The Bad, and The Ugly of any matter - with solutions to conquer even the darkest outcomes.';
+    case 'Voidwhisper':
+      return 'Greetings, seeker. I am the bridge between your queries and the wisdom of ages past. Share your concerns, and I shall illuminate them with historical parallels and timeless lessons learned by those who walked before us.';
+    case 'Infernal Scholar':
+      return '*The quill scratches across parchment* Your words shall be refined in my forge of rhetoric. Present your rough prompts, and I shall reshape them into masterworks of clarity and precision, detailing every enhancement made.';
+    case 'Bone Oracle':
+      return 'The bones are cast, the web awaits. I divine comprehensive knowledge from the digital ether - summoning articles, videos, melodies, and wisdom. Ask, and receive a tapestry of interconnected insights.';
+    case 'Vibe Coder':
+      return '⚡ Prompt engineering mode activated. Feed me your raw ideas - I\'ll transform them into optimized prompts. Select your output format above: Text for simplicity, Markup for structure, JSON for data, XML for systems.';
+    default:
+      return 'Welcome to the Shadow Nexus. What secrets do you seek?';
+  }
+};
+
+const ShadowNexusChat = () => {
+  const [activeModel, setActiveModel] = useState('Voidwhisper');
+  const [messages, setMessages] = useState([{
+    id: 1,
+    type: 'ai',
+    content: getWelcomeMessage('Voidwhisper'),
+    timestamp: new Date().toLocaleTimeString(),
+    isWelcome: true
+  }]);
+  const [inputValue, setInputValue] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+  const [conversationHistory, setConversationHistory] = useState([]);
+  const [starredItems, setStarredItems] = useState([]);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showVault, setShowVault] = useState(false);
+  const [showReader, setShowReader] = useState(false);
+  const [selectedVaultItem, setSelectedVaultItem] = useState(null);
+  const [outputFormat, setOutputFormat] = useState('Text');
+  const [settings, setSettings] = useState({ temperature: 0.7, maxTokens: 2048 });
+  const [showFullscreen, setShowFullscreen] = useState(false);
+  const [showAgentInfo, setShowAgentInfo] = useState(false);
+  const [selectedAgent, setSelectedAgent] = useState(null);
+  const [pendingExecution, setPendingExecution] = useState(null);
+  const [showArchitectWizard, setShowArchitectWizard] = useState(false);
+  const [wizardStep, setWizardStep] = useState(1);
+  const [wizardSelections, setWizardSelections] = useState({
+    projectType: '',
+    methodology: '',
+    projectSize: '',
+    timeframe: ''
+  });
+  const [architectureOptions, setArchitectureOptions] = useState({
+    methodology: 'Agile/Scrum',
+    language: 'JavaScript',
+    frontend: 'React',
+    backend: 'Express.js',
+    database: 'PostgreSQL',
+    architecture: 'Monolithic',
+    testing: 'Jest',
+    deployment: 'Docker',
+    codeStyle: 'Standard'
+  });
+  const messagesEndRef = useRef(null);
+
+  // Utility functions
+  const getCurrentModel = () => aiModels.find(m => m.name === activeModel);
+  const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  
+  const buildPrompt = (userMessage, model) => {
+    const recent = conversationHistory.slice(-6);
+    const context = recent.length > 0 
+      ? `Previous conversation context:\n${recent.map(m => `${m.role}: ${m.content}`).join('\n')}\n\n`
+      : '';
+    
+    let formatInstruction = '';
+    if (model.name === 'Vibe Coder') {
+      switch(outputFormat) {
+        case 'JSON':
+          formatInstruction = '\n\nOutput as a JSON object with keys like "prompt", "context", "instructions", etc.';
+          break;
+        case 'XML':
+          formatInstruction = '\n\nOutput as XML with tags like <prompt>, <context>, <instructions>, etc.';
+          break;
+        case 'Markup':
+          formatInstruction = '\n\nOutput as markdown with proper headers, bold text, lists, and code blocks where appropriate.';
+          break;
+        default:
+          formatInstruction = '\n\nOutput as plain text.';
+      }
+    } else if (model.name === 'Code Architect') {
+      formatInstruction = `\n\nGenerate code using the following specifications:
+- Methodology: ${architectureOptions.methodology}
+- Language: ${architectureOptions.language}
+- Frontend Framework: ${architectureOptions.frontend}
+- Backend Framework: ${architectureOptions.backend}
+- Database: ${architectureOptions.database}
+- Architecture Pattern: ${architectureOptions.architecture}
+- Testing Framework: ${architectureOptions.testing}
+- Deployment Target: ${architectureOptions.deployment}
+- Code Style: ${architectureOptions.codeStyle}
+
+Follow best practices for the selected stack and include appropriate documentation and error handling.`;
+    }
+    
+    return `${model.systemPrompt}${formatInstruction}\n\n${context}User: ${userMessage}\n\nRespond as ${model.name}. Temperature: ${settings.temperature}, Max tokens: ${settings.maxTokens}`;
+  };
+
+  const getAgentInfo = (modelName) => {
+    const agents = {
+      'Voidwhisper': {
+        description: 'Voidwhisper is a concise oracle who connects your present queries to the wisdom of history. This agent specializes in finding relevant historical parallels and extracting timeless lessons.',
+        capabilities: [
+          'Provides brief acknowledgments followed by historical insights',
+          'Connects current situations to past events and their outcomes',
+          'Extracts practical lessons from historical examples'
+        ],
+        tips: [
+          'Ask about challenges you\'re facing to learn from history',
+          'Use when seeking perspective on current events',
+          'Ideal for understanding patterns and cycles'
+        ],
+        example: 'How do I handle a difficult team member?'
+      },
+      'Infernal Scholar': {
+        description: 'Infernal Scholar is a meticulous prompt engineer who transforms rough ideas into precisely crafted prompts. This agent acts as your personal editor for AI communication.',
+        capabilities: [
+          'Rewrites and optimizes your prompts for clarity and effectiveness',
+          'Provides detailed explanations of all improvements made',
+          'Helps you learn better prompt engineering techniques'
+        ],
+        tips: [
+          'Use before submitting complex queries to other AI models',
+          'Great for learning how to write better prompts',
+          'Helpful when you\'re not getting the results you want'
+        ],
+        example: 'Help me with coding'
+      },
+      'Bone Oracle': {
+        description: 'Bone Oracle is a comprehensive research entity that gathers knowledge from across the digital realm. This agent provides multi-source insights with links and references.',
+        capabilities: [
+          'Provides brief summaries with 2-5 relevant website links',
+          'Includes YouTube video recommendations',
+          'Suggests related music and provides inspirational quotes',
+          'Creates a web of interconnected resources'
+        ],
+        tips: [
+          'Use for research projects or learning new topics',
+          'Great when you need multiple perspectives and sources',
+          'Ideal for creative projects needing inspiration'
+        ],
+        example: 'Sustainable living practices'
+      },
+      'Vibe Coder': {
+        description: 'Vibe Coder is a specialized prompt optimization expert who transforms raw ideas into perfectly formatted prompts. This agent adapts output to your chosen format without explanatory fluff.',
+        capabilities: [
+          'Optimizes prompts without meta-commentary',
+          'Outputs in multiple formats: Text, Markup, JSON, or XML',
+          'Creates clean, efficient prompts ready for immediate use'
+        ],
+        tips: [
+          'Select your desired output format before sending',
+          'Use for creating structured prompts for specific applications',
+          'Perfect for API integrations or systematic prompt generation'
+        ],
+        example: 'Create a customer service chatbot personality'
+      },
+      'Code Architect': {
+        description: 'Code Architect is a comprehensive code generation specialist that creates tailored development solutions based on your exact specifications. This agent understands the nuances of different tech stacks and generates production-ready code.',
+        capabilities: [
+          'Generates code following your selected methodology (Agile, TDD, etc.)',
+          'Supports multiple languages and their ecosystem frameworks',
+          'Creates appropriate architecture patterns (Monolithic, Microservices, etc.)',
+          'Includes testing strategies and deployment configurations',
+          'Follows specified code style and documentation standards'
+        ],
+        tips: [
+          'Configure your tech stack using the dropdown menus or "More..." button',
+          'Be specific about features and functionality in your request',
+          'The agent will handle boilerplate and best practices automatically',
+          'Great for starting new projects or adding features to existing ones'
+        ],
+        example: 'Create a user authentication system with email verification'
+      }
+    };
+    
+    return agents[modelName] || null;
+  };
+
+  const copyToClipboard = async (text) => {
+    try { await navigator.clipboard.writeText(text); } catch (err) {}
+  };
+
+  const openAgentInfo = (agentName) => {
+    setSelectedAgent(agentName);
+    setShowAgentInfo(true);
+  };
+
+  const handleStarMessage = (message) => {
+    if (starredItems.find(item => item.messageId === message.id)) return;
+    
+    const currentIndex = messages.findIndex(m => m.id === message.id);
+    let userPrompt = '';
+    for (let i = currentIndex - 1; i >= 0; i--) {
+      if (messages[i].type === 'user') {
+        userPrompt = messages[i].content;
+        break;
+      }
+    }
+
+    setStarredItems(prev => [...prev, {
+      id: Date.now(),
+      messageId: message.id,
+      content: message.content,
+      model: message.model || activeModel,
+      timestamp: message.timestamp,
+      userPrompt,
+      dateStarred: new Date().toLocaleDateString()
+    }]);
+    
+    setMessages(prev => prev.map(msg => 
+      msg.id === message.id ? { ...msg, isStarred: true } : msg
+    ));
+  };
+
+  const handleSendMessage = async (isExecution = false, executionPrompt = null) => {
+    if (!isExecution && (!inputValue.trim() || isTyping)) return;
+    if (isExecution && !executionPrompt) return;
+
+    if (messages.some(msg => msg.isWelcome)) {
+      setMessages(prev => prev.filter(msg => !msg.isWelcome));
+      setConversationHistory([]);
+    }
+
+    const userMessage = isExecution ? executionPrompt : inputValue.trim();
+    const currentModel = getCurrentModel();
+    
+    // For execution phase, we don't show the user message again
+    if (!isExecution) {
+      setMessages(prev => [...prev, {
+        id: Date.now(),
+        type: 'user',
+        content: userMessage,
+        timestamp: new Date().toLocaleTimeString()
+      }]);
+      setInputValue('');
+    }
+    
+    setIsTyping(true);
+    setConversationHistory(prev => [...prev, { role: 'user', content: userMessage }]);
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, currentModel.delay));
+      
+      let prompt;
+      if (isExecution) {
+        // Execution phase - use natural language response
+        const executionSystemPrompt = `You are an expert AI assistant. Take the following optimized prompt and provide a comprehensive, natural language response. Be thorough, insightful, and helpful. Respond conversationally as you would to any query, not in any special format.`;
+        
+        prompt = `${executionSystemPrompt}\n\nPrompt to answer:\n${userMessage}\n\nProvide a detailed, helpful response in natural language. Temperature: ${settings.temperature}, Max tokens: ${settings.maxTokens}`;
+      } else {
+        prompt = buildPrompt(userMessage, currentModel);
+      }
+      
+      const response = await window.claude.complete(prompt);
+      
+      const aiResponse = {
+        id: Date.now() + 1,
+        type: 'ai',
+        content: response,
+        timestamp: new Date().toLocaleTimeString(),
+        model: activeModel,
+        isVibeCoderOptimization: !isExecution && activeModel === 'Vibe Coder',
+        executionFormat: isExecution ? outputFormat : null
+      };
+
+      setMessages(prev => [...prev, aiResponse]);
+      
+      // If this is a Vibe Coder optimization, prepare for potential execution
+      if (!isExecution && activeModel === 'Vibe Coder') {
+        setPendingExecution({
+          prompt: response,
+          format: outputFormat
+        });
+      }
+      
+      setConversationHistory(prev => [...prev, { role: 'assistant', content: response }].slice(-12));
+    } catch (error) {
+      setMessages(prev => [...prev, {
+        id: Date.now() + 1,
+        type: 'ai',
+        content: `*The shadows flicker...* ${currentModel.name} encountered an error. Please try again.`,
+        timestamp: new Date().toLocaleTimeString(),
+        isError: true
+      }]);
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
+  const executeOptimizedPrompt = (optimizedPrompt) => {
+    handleSendMessage(true, optimizedPrompt);
+  };
+
+  useEffect(() => {
+    if (messages.length > 0 && messages[messages.length - 1].type === 'user') {
+      scrollToBottom();
+    }
+  }, [messages]);
+
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === 'Escape') {
+        if (showAgentInfo) {
+          setShowAgentInfo(false);
+          setSelectedAgent(null);
+        } else if (showFullscreen) {
+          setShowFullscreen(false);
+        } else if (showReader) {
+          setShowReader(false);
+          setSelectedVaultItem(null);
+        }
+      }
+    };
+    if (showReader || showFullscreen || showAgentInfo) {
+      document.addEventListener('keydown', handleEsc);
+      return () => document.removeEventListener('keydown', handleEsc);
+    }
+  }, [showReader, showFullscreen, showAgentInfo]);
+
+  // Simplified styles
+  const s = {
+    panel: 'fixed bg-black/90 border border-stone-700/50 backdrop-blur-sm rounded-lg z-50 p-4 shadow-2xl',
+    btn: 'p-3 hover:bg-stone-700/50 rounded-lg transition-colors',
+    msg: 'max-w-3xl rounded-2xl p-4',
+    msgUser: 'bg-gradient-to-r from-amber-700 to-orange-700 text-white ml-12',
+    msgAi: 'bg-black/40 border border-stone-700/30 backdrop-blur-sm mr-12'
+  };
+
+  return (
+    <div className="h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-stone-900 text-slate-100 flex flex-col">
+      {/* Header */}
+      <div className="border-b border-stone-700/50 bg-black/30 backdrop-blur-sm p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-amber-700 to-orange-800 rounded-lg flex items-center justify-center">
+              <Eye className="w-6 h-6 text-amber-300" />
+            </div>
+            <h1 className="text-xl font-bold bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent">
+              Shadow Nexus
+            </h1>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <select 
+              value={activeModel}
+              onChange={(e) => {
+                setActiveModel(e.target.value);
+                // Update welcome message when model changes
+                if (messages.length === 1 && messages[0].isWelcome) {
+                  setMessages([{
+                    id: 1,
+                    type: 'ai',
+                    content: getWelcomeMessage(e.target.value),
+                    timestamp: new Date().toLocaleTimeString(),
+                    isWelcome: true
+                  }]);
+                }
+              }}
+              className="bg-black/50 border border-stone-600/50 rounded-lg px-3 py-2 text-sm"
+            >
+              {aiModels.map(m => <option key={m.name} value={m.name}>{m.name}</option>)}
+            </select>
+            
+            {/* Secondary dropdown for Vibe Coder format */}
+            {activeModel === 'Vibe Coder' && (
+              <select 
+                value={outputFormat}
+                onChange={(e) => setOutputFormat(e.target.value)}
+                className="bg-black/50 border border-amber-600/50 rounded-lg px-3 py-2 text-sm"
+              >
+                <option value="Text">Text</option>
+                <option value="Markup">Markup</option>
+                <option value="JSON">JSON</option>
+                <option value="XML">XML</option>
+              </select>
+            )}
+            
+            {/* Architecture dropdowns for Code Architect */}
+            {activeModel === 'Code Architect' && (
+              <div className="flex items-center space-x-2 flex-wrap">
+                <button 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setShowArchitectWizard(true);
+                  }}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg px-3 py-2 text-xs md:text-sm font-medium transition-colors flex items-center space-x-1"
+                >
+                  <Settings className="w-4 h-4" />
+                  <span>Configuration Wizard</span>
+                </button>
+                
+                <span className="hidden md:inline text-xs text-stone-400">or use quick →</span>
+                
+                <select 
+                  value={architectureOptions.language}
+                  onChange={(e) => setArchitectureOptions(prev => ({ ...prev, language: e.target.value }))}
+                  className="bg-black/50 border border-green-600/50 rounded-lg px-2 py-2 text-xs"
+                  title="Quick Language Select"
+                >
+                  <option value="JavaScript">JavaScript</option>
+                  <option value="TypeScript">TypeScript</option>
+                  <option value="Python">Python</option>
+                  <option value="Java">Java</option>
+                  <option value="C#">C#</option>
+                  <option value="Go">Go</option>
+                </select>
+              </div>
+            )}
+
+            {/* Step 3: Architecture & Patterns */}
+            {wizardStep === 3 && (
+              <div className="flex-1 overflow-y-auto p-6">
+                <div className="max-w-4xl mx-auto space-y-8">
+                  {/* System Architecture */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-amber-300 mb-4">System Architecture</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {(() => {
+                        // Recommend architectures based on project size
+                        const architectures = [
+                          { 
+                            value: 'Monolithic', 
+                            icon: '📦', 
+                            desc: 'Single deployable unit',
+                            recommended: ['Prototype', 'Small'],
+                            pros: 'Simple to develop, test, and deploy',
+                            cons: 'Scaling limitations for large teams'
+                          },
+                          { 
+                            value: 'Modular Monolith', 
+                            icon: '🧩', 
+                            desc: 'Monolith with clear module boundaries',
+                            recommended: ['Small', 'Medium'],
+                            pros: 'Better organization, easier to refactor',
+                            cons: 'Still single deployment unit'
+                          },
+                          { 
+                            value: 'Microservices', 
+                            icon: '🔗', 
+                            desc: 'Distributed services architecture',
+                            recommended: ['Medium', 'Large'],
+                            pros: 'Independent scaling and deployment',
+                            cons: 'Complex orchestration and debugging'
+                          },
+                          { 
+                            value: 'Serverless', 
+                            icon: '☁️', 
+                            desc: 'Function-based architecture',
+                            recommended: ['Prototype', 'Small', 'Medium'],
+                            pros: 'No server management, auto-scaling',
+                            cons: 'Vendor lock-in, cold starts'
+                          },
+                          { 
+                            value: 'Event-Driven', 
+                            icon: '📡', 
+                            desc: 'Async message-based architecture',
+                            recommended: ['Medium', 'Large'],
+                            pros: 'Loose coupling, scalability',
+                            cons: 'Complex error handling'
+                          },
+                          { 
+                            value: 'Hexagonal', 
+                            icon: '⬡', 
+                            desc: 'Ports and adapters pattern',
+                            recommended: ['Medium', 'Large'],
+                            pros: 'Testable, flexible integrations',
+                            cons: 'Initial complexity overhead'
+                          }
+                        ];
+                        
+                        return architectures.map(arch => {
+                          const isRecommended = arch.recommended.includes(wizardSelections.projectSize);
+                          
+                          return (
+                            <button
+                              key={arch.value}
+                              onClick={() => setWizardSelections(prev => ({ ...prev, architecture: arch.value }))}
+                              className={`p-4 rounded-lg border transition-all relative ${
+                                wizardSelections.architecture === arch.value
+                                  ? 'border-amber-500 bg-amber-700/20'
+                                  : isRecommended
+                                    ? 'border-green-600/50 bg-green-900/10 hover:bg-green-900/20'
+                                    : 'border-stone-700 bg-black/40 hover:bg-black/60'
+                              }`}
+                            >
+                              {isRecommended && (
+                                <span className="absolute top-2 right-2 text-xs bg-green-600/20 text-green-400 px-2 py-1 rounded">
+                                  Recommended
+                                </span>
+                              )}
+                              <div className="flex items-start space-x-3">
+                                <span className="text-2xl">{arch.icon}</span>
+                                <div className="text-left flex-1">
+                                  <div className={`font-medium ${
+                                    wizardSelections.architecture === arch.value ? 'text-amber-200' : 'text-slate-200'
+                                  }`}>
+                                    {arch.value}
+                                  </div>
+                                  <div className="text-xs text-stone-400 mt-1">{arch.desc}</div>
+                                  <div className="text-xs mt-2 space-y-1">
+                                    <div className="text-green-400">✓ {arch.pros}</div>
+                                    <div className="text-red-400">✗ {arch.cons}</div>
+                                  </div>
+                                </div>
+                              </div>
+                            </button>
+                          );
+                        });
+                      })()}
+                    </div>
+                  </div>
+
+                  {/* API Pattern */}
+                  {(wizardSelections.projectType === 'Web Application' || wizardSelections.projectType === 'API Service') && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-amber-300 mb-4">API Architecture</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {[
+                          { value: 'REST', icon: '🔄', desc: 'Standard HTTP APIs' },
+                          { value: 'GraphQL', icon: '◈', desc: 'Query language for APIs' },
+                          { value: 'gRPC', icon: '⚡', desc: 'High-performance RPC' },
+                          { value: 'WebSocket', icon: '🔌', desc: 'Real-time bidirectional' },
+                          { value: 'tRPC', icon: '🔗', desc: 'Type-safe RPC' },
+                          { value: 'JSON-RPC', icon: '📋', desc: 'Simple RPC protocol' },
+                          { value: 'REST + GraphQL', icon: '🎭', desc: 'Hybrid approach' },
+                          { value: 'Event Streaming', icon: '📊', desc: 'Kafka/EventSource' }
+                        ].map(api => (
+                          <button
+                            key={api.value}
+                            onClick={() => setWizardSelections(prev => ({ ...prev, apiPattern: api.value }))}
+                            className={`p-3 rounded-lg border transition-all ${
+                              wizardSelections.apiPattern === api.value
+                                ? 'border-amber-500 bg-amber-700/20 text-amber-200'
+                                : 'border-stone-700 bg-black/40 hover:bg-black/60 text-slate-200'
+                            }`}
+                          >
+                            <div className="text-xl mb-1">{api.icon}</div>
+                            <div className="font-medium text-sm">{api.value}</div>
+                            <div className="text-xs text-stone-400">{api.desc}</div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Frontend Pattern (for Web/Mobile) */}
+                  {(wizardSelections.projectType === 'Web Application' || wizardSelections.projectType === 'Mobile App') && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-amber-300 mb-4">Frontend Architecture</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {[
+                          { value: 'SPA', desc: 'Single Page Application', detail: 'Client-side routing' },
+                          { value: 'SSR', desc: 'Server-Side Rendering', detail: 'SEO friendly' },
+                          { value: 'SSG', desc: 'Static Site Generation', detail: 'Pre-built pages' },
+                          { value: 'PWA', desc: 'Progressive Web App', detail: 'Offline capable' },
+                          { value: 'ISR', desc: 'Incremental Static', detail: 'Best of SSR/SSG' },
+                          { value: 'Hybrid', desc: 'Mixed Rendering', detail: 'Per-route strategy' }
+                        ].map(pattern => (
+                          <button
+                            key={pattern.value}
+                            onClick={() => setWizardSelections(prev => ({ ...prev, frontendPattern: pattern.value }))}
+                            className={`p-4 rounded-lg border transition-all ${
+                              wizardSelections.frontendPattern === pattern.value
+                                ? 'border-amber-500 bg-amber-700/20 text-amber-200'
+                                : 'border-stone-700 bg-black/40 hover:bg-black/60 text-slate-200'
+                            }`}
+                          >
+                            <div className="font-medium">{pattern.value}</div>
+                            <div className="text-sm text-stone-300 mt-1">{pattern.desc}</div>
+                            <div className="text-xs text-stone-400 mt-1">{pattern.detail}</div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* State Management (for frontend apps) */}
+                  {wizardSelections.frontendPattern && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-amber-300 mb-4">State Management</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {(() => {
+                          const stateOptions = {
+                            'React': ['Context API', 'Redux', 'Zustand', 'MobX', 'Recoil', 'Jotai', 'Valtio', 'None'],
+                            'Vue.js': ['Vuex', 'Pinia', 'Composition API', 'None'],
+                            'Angular': ['NgRx', 'Akita', 'RxJS', 'Services'],
+                            'Svelte': ['Svelte Stores', 'None'],
+                            'default': ['Local State', 'Context/Props', 'External Store', 'None']
+                          };
+                          
+                          const options = stateOptions[wizardSelections.framework] || stateOptions['default'];
+                          
+                          return options.map(state => (
+                            <button
+                              key={state}
+                              onClick={() => setWizardSelections(prev => ({ ...prev, stateManagement: state }))}
+                              className={`p-3 rounded-lg border transition-all ${
+                                wizardSelections.stateManagement === state
+                                  ? 'border-amber-500 bg-amber-700/20 text-amber-200'
+                                  : 'border-stone-700 bg-black/40 hover:bg-black/60 text-slate-200'
+                              }`}
+                            >
+                              <div className="font-medium text-sm">{state}</div>
+                            </button>
+                          ));
+                        })()}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Authentication Strategy */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-amber-300 mb-4">Authentication Strategy</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {[
+                        { value: 'JWT', icon: '🔐', desc: 'JSON Web Tokens', detail: 'Stateless auth' },
+                        { value: 'Session', icon: '🍪', desc: 'Cookie-based', detail: 'Server sessions' },
+                        { value: 'OAuth2', icon: '🔑', desc: 'Third-party auth', detail: 'Google, GitHub, etc' },
+                        { value: 'Auth0', icon: '🛡️', desc: 'Managed service', detail: 'Complete solution' },
+                        { value: 'Supabase Auth', icon: '⚡', desc: 'Built-in auth', detail: 'With Supabase DB' },
+                        { value: 'Magic Links', icon: '✉️', desc: 'Passwordless', detail: 'Email-based' },
+                        { value: 'Passkeys', icon: '🔏', desc: 'WebAuthn', detail: 'Biometric/FIDO2' },
+                        { value: 'Custom', icon: '🔧', desc: 'Roll your own', detail: 'Full control' },
+                        { value: 'None', icon: '🚫', desc: 'No auth needed', detail: 'Public access' }
+                      ].map(auth => (
+                        <button
+                          key={auth.value}
+                          onClick={() => setWizardSelections(prev => ({ ...prev, authentication: auth.value }))}
+                          className={`p-3 rounded-lg border transition-all ${
+                            wizardSelections.authentication === auth.value
+                              ? 'border-amber-500 bg-amber-700/20 text-amber-200'
+                              : 'border-stone-700 bg-black/40 hover:bg-black/60 text-slate-200'
+                          }`}
+                        >
+                          <div className="flex items-center space-x-2 mb-1">
+                            <span className="text-lg">{auth.icon}</span>
+                            <span className="font-medium text-sm">{auth.value}</span>
+                          </div>
+                          <div className="text-xs text-stone-300">{auth.desc}</div>
+                          <div className="text-xs text-stone-400">{auth.detail}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Step 2: Technology Stack */}
+            {wizardStep === 2 && (
+              <div className="flex-1 overflow-y-auto p-6">
+                <div className="max-w-4xl mx-auto space-y-8">
+                  {/* Primary Language */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-amber-300 mb-4">Primary Language</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {(() => {
+                        // Filter languages based on project type
+                        const languages = {
+                          'Web Application': ['TypeScript', 'JavaScript', 'Python', 'Java', 'C#', 'Go'],
+                          'API Service': ['Node.js', 'Python', 'Go', 'Java', 'C#', 'Rust'],
+                          'Mobile App': ['React Native', 'Flutter/Dart', 'Swift', 'Kotlin', 'TypeScript'],
+                          'Desktop App': ['Electron/JS', 'C#', 'Python', 'Java', 'C++', 'Rust'],
+                          'CLI Tool': ['Go', 'Rust', 'Python', 'Node.js', 'C++'],
+                          'Library/Package': ['TypeScript', 'Python', 'Rust', 'Go', 'Java']
+                        };
+                        
+                        const availableLanguages = languages[wizardSelections.projectType] || languages['Web Application'];
+                        
+                        return availableLanguages.map(lang => (
+                          <button
+                            key={lang}
+                            onClick={() => setWizardSelections(prev => ({ ...prev, language: lang }))}
+                            className={`p-4 rounded-lg border transition-all ${
+                              wizardSelections.language === lang
+                                ? 'border-amber-500 bg-amber-700/20 text-amber-200'
+                                : 'border-stone-700 bg-black/40 hover:bg-black/60 text-slate-200'
+                            }`}
+                          >
+                            <div className="font-medium">{lang}</div>
+                            <div className="text-xs text-stone-400 mt-1">
+                              {lang.includes('TypeScript') && 'Type-safe JS'}
+                              {lang.includes('Python') && 'Versatile & readable'}
+                              {lang.includes('Go') && 'Fast & concurrent'}
+                              {lang.includes('Rust') && 'Memory safe'}
+                              {lang.includes('Java') && 'Enterprise ready'}
+                              {lang.includes('C#') && '.NET ecosystem'}
+                              {lang.includes('Node') && 'JavaScript runtime'}
+                              {lang.includes('Swift') && 'iOS native'}
+                              {lang.includes('Kotlin') && 'Android native'}
+                              {lang.includes('Flutter') && 'Cross-platform'}
+                              {lang.includes('Electron') && 'Web-based desktop'}
+                            </div>
+                          </button>
+                        ));
+                      })()}
+                    </div>
+                  </div>
+
+                  {/* Framework Selection */}
+                  {wizardSelections.language && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-amber-300 mb-4">
+                        {wizardSelections.projectType === 'Web Application' ? 'Frontend Framework' : 'Primary Framework'}
+                      </h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {(() => {
+                          const frameworks = {
+                            'TypeScript': ['Next.js', 'React', 'Angular', 'Vue.js', 'Svelte', 'Remix'],
+                            'JavaScript': ['React', 'Vue.js', 'Express.js', 'Next.js', 'Svelte'],
+                            'Python': ['Django', 'FastAPI', 'Flask', 'Tornado'],
+                            'Java': ['Spring Boot', 'Quarkus', 'Micronaut'],
+                            'C#': ['ASP.NET Core', 'Blazor', 'MAUI'],
+                            'Go': ['Gin', 'Echo', 'Fiber', 'Native'],
+                            'Rust': ['Actix', 'Rocket', 'Axum'],
+                            'Node.js': ['Express.js', 'Fastify', 'NestJS', 'Koa'],
+                            'React Native': ['Expo', 'Bare Workflow'],
+                            'Flutter/Dart': ['Material', 'Cupertino'],
+                            'Swift': ['UIKit', 'SwiftUI'],
+                            'Kotlin': ['Jetpack Compose', 'Android View'],
+                            'Electron/JS': ['React', 'Vue', 'Vanilla']
+                          };
+                          
+                          const availableFrameworks = frameworks[wizardSelections.language] || ['None'];
+                          
+                          return availableFrameworks.map(framework => (
+                            <button
+                              key={framework}
+                              onClick={() => setWizardSelections(prev => ({ ...prev, framework: framework }))}
+                              className={`p-3 rounded-lg border transition-all ${
+                                wizardSelections.framework === framework
+                                  ? 'border-amber-500 bg-amber-700/20 text-amber-200'
+                                  : 'border-stone-700 bg-black/40 hover:bg-black/60 text-slate-200'
+                              }`}
+                            >
+                              <div className="font-medium text-sm">{framework}</div>
+                            </button>
+                          ));
+                        })()}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Backend Framework (for Web Apps) */}
+                  {wizardSelections.projectType === 'Web Application' && wizardSelections.framework && (
+                    <div>
+                      <h3 className="text-lg font-semibold text-amber-300 mb-4">Backend Framework</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {[
+                          { value: 'Express.js', desc: 'Minimal Node.js' },
+                          { value: 'NestJS', desc: 'Enterprise Node.js' },
+                          { value: 'FastAPI', desc: 'Modern Python' },
+                          { value: 'Django', desc: 'Batteries Python' },
+                          { value: 'Spring Boot', desc: 'Java standard' },
+                          { value: 'ASP.NET Core', desc: 'C# framework' },
+                          { value: 'Gin', desc: 'Fast Go' },
+                          { value: 'Rails', desc: 'Ruby classic' }
+                        ].map(backend => (
+                          <button
+                            key={backend.value}
+                            onClick={() => setWizardSelections(prev => ({ ...prev, backend: backend.value }))}
+                            className={`p-3 rounded-lg border transition-all ${
+                              wizardSelections.backend === backend.value
+                                ? 'border-amber-500 bg-amber-700/20 text-amber-200'
+                                : 'border-stone-700 bg-black/40 hover:bg-black/60 text-slate-200'
+                            }`}
+                          >
+                            <div className="font-medium text-sm">{backend.value}</div>
+                            <div className="text-xs text-stone-400">{backend.desc}</div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Database Selection */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-amber-300 mb-4">Primary Database</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {[
+                        { value: 'PostgreSQL', icon: '🐘', desc: 'Relational, ACID' },
+                        { value: 'MongoDB', icon: '🍃', desc: 'Document store' },
+                        { value: 'MySQL', icon: '🐬', desc: 'Popular SQL' },
+                        { value: 'Redis', icon: '⚡', desc: 'In-memory cache' },
+                        { value: 'SQLite', icon: '📦', desc: 'Embedded SQL' },
+                        { value: 'DynamoDB', icon: '☁️', desc: 'AWS NoSQL' },
+                        { value: 'Firestore', icon: '🔥', desc: 'Google NoSQL' },
+                        { value: 'Supabase', icon: '⚡', desc: 'Postgres + Auth' },
+                        { value: 'None', icon: '❌', desc: 'No database' }
+                      ].map(db => (
+                        <button
+                          key={db.value}
+                          onClick={() => setWizardSelections(prev => ({ ...prev, database: db.value }))}
+                          className={`p-3 rounded-lg border transition-all ${
+                            wizardSelections.database === db.value
+                              ? 'border-amber-500 bg-amber-700/20 text-amber-200'
+                              : 'border-stone-700 bg-black/40 hover:bg-black/60 text-slate-200'
+                          }`}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <span className="text-lg">{db.icon}</span>
+                            <div className="text-left">
+                              <div className="font-medium text-sm">{db.value}</div>
+                              <div className="text-xs text-stone-400">{db.desc}</div>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            <button onClick={() => setShowSettings(!showSettings)} className={s.btn}>
+              <Settings className="w-6 h-6" />
+            </button>
+            <button onClick={() => setShowVault(!showVault)} className={s.btn}>
+              <FolderOpen className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Settings (minimal) */}
+      {showSettings && (
+        <div className={`${s.panel} top-20 right-4 w-80`}>
+          <h3 className="text-lg font-semibold mb-4 text-amber-300">Entity Configuration</h3>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-200 mb-2">
+                Temperature: {settings.temperature}
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="2"
+                step="0.1"
+                value={settings.temperature}
+                onChange={(e) => setSettings(prev => ({ ...prev, temperature: parseFloat(e.target.value) }))}
+                className="w-full h-2 bg-stone-700 rounded-lg appearance-none cursor-pointer"
+                style={{
+                  background: `linear-gradient(to right, #d97706 0%, #d97706 ${(settings.temperature / 2) * 100}%, #57534e ${(settings.temperature / 2) * 100}%, #57534e 100%)`
+                }}
+              />
+              <div className="flex justify-between text-xs text-stone-400 mt-1">
+                <span>Focused</span>
+                <span>Balanced</span>
+                <span>Creative</span>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-200 mb-2">
+                Max Tokens: {settings.maxTokens}
+              </label>
+              <input
+                type="range"
+                min="256"
+                max="4096"
+                step="256"
+                value={settings.maxTokens}
+                onChange={(e) => setSettings(prev => ({ ...prev, maxTokens: parseInt(e.target.value) }))}
+                className="w-full h-2 bg-stone-700 rounded-lg appearance-none cursor-pointer"
+                style={{
+                  background: `linear-gradient(to right, #d97706 0%, #d97706 ${((settings.maxTokens - 256) / (4096 - 256)) * 100}%, #57534e ${((settings.maxTokens - 256) / (4096 - 256)) * 100}%, #57534e 100%)`
+                }}
+              />
+              <div className="flex justify-between text-xs text-stone-400 mt-1">
+                <span>Short</span>
+                <span>Medium</span>
+                <span>Long</span>
+              </div>
+            </div>
+
+            <div className="bg-black/40 rounded-lg p-3 border border-stone-700/30">
+              <div className="flex items-center space-x-2 mb-1">
+                <span className="text-sm text-amber-300">Active Model:</span>
+                <span className="text-sm">{activeModel}</span>
+              </div>
+              <div className="text-xs text-stone-500">{getCurrentModel()?.description}</div>
+            </div>
+
+            <button onClick={() => setShowSettings(false)} 
+                    className="w-full mt-2 bg-gradient-to-r from-amber-700 to-orange-700 hover:from-amber-800 hover:to-orange-800 py-2 rounded-lg transition-colors">
+              Apply Settings
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Vault (minimal) */}
+      {showVault && !showReader && (
+        <div className={`${s.panel} top-20 left-4 w-80 max-h-96 overflow-y-auto`}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-amber-300">Knowledge Vault ({starredItems.length})</h3>
+            <button onClick={() => setShowVault(false)} 
+                    className="text-2xl text-stone-400 hover:text-red-500 transition-colors">
+              ×
+            </button>
+          </div>
+          {starredItems.length === 0 ? (
+            <p className="text-stone-400 text-sm">No starred items yet</p>
+          ) : (
+            starredItems.map(item => (
+              <div key={item.id} onClick={() => { setSelectedVaultItem(item); setShowReader(true); setShowVault(false); }}
+                   className="bg-black/40 rounded p-3 mb-2 cursor-pointer hover:bg-black/60">
+                <div className="text-xs text-amber-300">{item.model}</div>
+                <div className="text-xs">{item.content.slice(0, 100)}...</div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {/* Reader (minimal) */}
+      {showReader && selectedVaultItem && (
+        <div className="fixed inset-0 bg-black/90 z-[100] flex flex-col">
+          {/* Mobile-friendly header with close button */}
+          <div className="bg-slate-900 p-4 flex justify-between items-center border-b border-stone-700">
+            <h3 className="text-lg text-amber-300 font-semibold">{selectedVaultItem.model}</h3>
+            <button onClick={() => { setShowReader(false); setSelectedVaultItem(null); }} 
+                    className="bg-red-600 hover:bg-red-700 text-white rounded-lg px-6 py-2 text-lg font-bold">
+              Close
+            </button>
+          </div>
+          
+          {/* Scrollable content */}
+          <div className="flex-1 overflow-y-auto bg-slate-900 p-4">
+            {selectedVaultItem.userPrompt && (
+              <div className="mb-4 p-4 bg-amber-700/20 rounded">
+                <strong>Q:</strong> {selectedVaultItem.userPrompt}
+              </div>
+            )}
+            <div className="whitespace-pre-wrap pb-20">{selectedVaultItem.content}</div>
+          </div>
+        </div>
+      )}
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.map(msg => (
+          <div key={msg.id} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`${s.msg} ${msg.type === 'user' ? s.msgUser : s.msgAi}`}>
+              {msg.type === 'ai' && (
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center space-x-2">
+                    <button onClick={() => openAgentInfo(msg.model || activeModel)}
+                            className="text-sm font-medium text-amber-300 hover:text-amber-200 cursor-pointer transition-colors">
+                      {msg.model || activeModel}
+                    </button>
+                    {msg.executionFormat && (
+                      <span className="text-xs bg-amber-700/30 text-amber-200 px-2 py-1 rounded-full">
+                        Executed Response
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex space-x-1">
+                    <button onClick={() => copyToClipboard(msg.content)} className="p-1 hover:bg-stone-700/50 rounded">
+                      <Copy className="w-4 h-4" />
+                    </button>
+                    {msg.isVibeCoderOptimization && (
+                      <button onClick={() => executeOptimizedPrompt(msg.content)} 
+                              className="p-1 hover:bg-stone-700/50 rounded bg-amber-700/20 border border-amber-600/30"
+                              title="Execute optimized prompt">
+                        <Zap className="w-4 h-4 text-amber-400" />
+                      </button>
+                    )}
+                    <button onClick={() => handleStarMessage(msg)} className="p-1 hover:bg-stone-700/50 rounded">
+                      <Star className={`w-4 h-4 ${msg.isStarred ? 'fill-current' : ''} text-amber-400`} />
+                    </button>
+                  </div>
+                </div>
+              )}
+              <div className="whitespace-pre-wrap">{msg.content}</div>
+            </div>
+          </div>
+        ))}
+        
+        {isTyping && (
+          <div className="flex justify-start">
+            <div className={s.msgAi}>
+              <div className="flex space-x-1">
+                <div className="w-2 h-2 bg-amber-400 rounded-full animate-bounce"></div>
+                <div className="w-2 h-2 bg-amber-400 rounded-full animate-bounce delay-100"></div>
+                <div className="w-2 h-2 bg-amber-400 rounded-full animate-bounce delay-200"></div>
+              </div>
+            </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input */}
+      <div className="border-t border-stone-700/50 bg-black/30 p-4">
+        <div className="flex items-center space-x-2">
+          <button onClick={() => setShowFullscreen(true)}
+                  className="bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-800 hover:to-slate-900 p-3 rounded-2xl transition-all duration-200 flex-shrink-0"
+                  title="Fullscreen mode">
+            <Maximize2 className="w-5 h-5" />
+          </button>
+          <textarea
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendMessage())}
+            placeholder="Speak your query to the void..."
+            className="flex-1 bg-black/50 border border-stone-600/50 rounded-2xl px-4 py-3 resize-none focus:outline-none focus:border-amber-500"
+            disabled={isTyping}
+          />
+          <button onClick={() => handleSendMessage()} disabled={!inputValue.trim() || isTyping}
+                  className="bg-gradient-to-r from-amber-700 to-orange-700 hover:from-amber-800 hover:to-orange-800 disabled:opacity-50 p-3 rounded-2xl flex-shrink-0">
+            <Send className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Fullscreen Input Mode */}
+      {showFullscreen && (
+        <div className="fixed inset-0 bg-black/95 z-[100] flex flex-col p-4">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg text-amber-300 font-semibold">Compose Message - {activeModel}</h3>
+            <button onClick={() => setShowFullscreen(false)} 
+                    className="bg-red-600 hover:bg-red-700 text-white rounded-lg px-6 py-2 font-bold">
+              Close
+            </button>
+          </div>
+          
+          <textarea
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder="Write your message here... 
+
+Use this expanded space to craft your thoughts before sending them to the Shadow Nexus."
+            className="flex-1 w-full bg-black/50 border border-stone-600/50 rounded-lg p-6 resize-none focus:outline-none focus:border-amber-500 text-slate-200 text-lg"
+            autoFocus
+          />
+          
+          <div className="flex justify-between items-center mt-4">
+            <span className="text-sm text-stone-400">Press ESC to close • {inputValue.length} characters</span>
+            <button onClick={() => { handleSendMessage(); setShowFullscreen(false); }} 
+                    disabled={!inputValue.trim() || isTyping}
+                    className="bg-gradient-to-r from-amber-700 to-orange-700 hover:from-amber-800 hover:to-orange-800 disabled:opacity-50 px-6 py-3 rounded-lg font-semibold">
+              Send Message
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Agent Info Modal */}
+      {showAgentInfo && selectedAgent && (
+        <div className="fixed inset-0 bg-black/90 z-[100] flex flex-col">
+          <div className="bg-slate-900 p-4 flex justify-between items-center border-b border-stone-700">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gradient-to-r from-amber-600 to-orange-700 rounded-full flex items-center justify-center">
+                {React.createElement(aiModels.find(m => m.name === selectedAgent)?.icon || Eye, { className: "w-5 h-5 text-amber-200" })}
+              </div>
+              <h3 className="text-lg text-amber-300 font-semibold">{selectedAgent}</h3>
+            </div>
+            <button onClick={() => { setShowAgentInfo(false); setSelectedAgent(null); }} 
+                    className="bg-red-600 hover:bg-red-700 text-white rounded-lg px-6 py-2 text-lg font-bold">
+              Close
+            </button>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto bg-slate-900 p-6">
+            {(() => {
+              const info = getAgentInfo(selectedAgent);
+              if (!info) return null;
+              
+              return (
+                <div className="max-w-4xl mx-auto space-y-6">
+                  <div className="bg-black/40 rounded-xl p-6 border border-stone-700/30">
+                    <h4 className="text-amber-300 font-semibold mb-3">Overview</h4>
+                    <p className="text-slate-200 leading-relaxed">{info.description}</p>
+                  </div>
+                  
+                  <div className="bg-black/40 rounded-xl p-6 border border-stone-700/30">
+                    <h4 className="text-amber-300 font-semibold mb-3">Capabilities</h4>
+                    <ul className="space-y-2">
+                      {info.capabilities.map((cap, i) => (
+                        <li key={i} className="flex items-start">
+                          <span className="text-amber-500 mr-2">•</span>
+                          <span className="text-slate-200">{cap}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  <div className="bg-black/40 rounded-xl p-6 border border-stone-700/30">
+                    <h4 className="text-amber-300 font-semibold mb-3">Tips for Best Results</h4>
+                    <ul className="space-y-2">
+                      {info.tips.map((tip, i) => (
+                        <li key={i} className="flex items-start">
+                          <span className="text-amber-500 mr-2">→</span>
+                          <span className="text-slate-200">{tip}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  
+                  <div className="bg-gradient-to-r from-amber-700/20 to-orange-700/20 rounded-xl p-6 border border-amber-600/30">
+                    <h4 className="text-amber-300 font-semibold mb-3">Example Query</h4>
+                    <p className="text-amber-200 italic">"{info.example}"</p>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      )}
+
+      {/* Code Architect Configuration Wizard */}
+      {showArchitectWizard && (
+        <div className="fixed inset-0 bg-black/95 z-[150] flex items-center justify-center p-4">
+          <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-stone-900 border border-stone-700/50 rounded-xl w-full max-w-5xl max-h-[90vh] flex flex-col shadow-2xl">
+            {/* Wizard Header */}
+            <div className="p-6 border-b border-stone-700/30">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-amber-300">Code Architect Configuration</h2>
+                  <p className="text-sm text-stone-400 mt-1">
+                    Step {wizardStep} of 5: {
+                      wizardStep === 1 ? 'Project Foundation' :
+                      wizardStep === 2 ? 'Technology Stack' :
+                      wizardStep === 3 ? 'Architecture & Patterns' :
+                      wizardStep === 4 ? 'Development Standards' :
+                      'Deployment & Operations'
+                    }
+                  </p>
+                </div>
+                <button onClick={() => setShowArchitectWizard(false)} 
+                        className="text-stone-400 hover:text-red-500 transition-colors">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              
+              {/* Progress Bar */}
+              <div className="flex items-center space-x-2">
+                <div className="flex-1 h-2 bg-stone-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-amber-600 to-orange-600 transition-all duration-300"
+                       style={{ width: `${(wizardStep / 5) * 100}%` }} />
+                </div>
+                <span className="text-xs text-stone-400">{wizardStep}/5</span>
+              </div>
+            </div>
+
+            {/* Step 1: Project Foundation */}
+            {wizardStep === 1 && (
+              <div className="flex-1 overflow-y-auto p-6">
+                <div className="max-w-4xl mx-auto space-y-8">
+                  {/* Project Type */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-amber-300 mb-4">What are you building?</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {[
+                        { value: 'Web Application', icon: '🌐', desc: 'Full-stack web app' },
+                        { value: 'API Service', icon: '🔌', desc: 'REST/GraphQL backend' },
+                        { value: 'Mobile App', icon: '📱', desc: 'iOS/Android app' },
+                        { value: 'Desktop App', icon: '🖥️', desc: 'Native desktop application' },
+                        { value: 'CLI Tool', icon: '⌨️', desc: 'Command line interface' },
+                        { value: 'Library/Package', icon: '📦', desc: 'Reusable code library' }
+                      ].map(type => (
+                        <button
+                          key={type.value}
+                          onClick={() => setWizardSelections(prev => ({ ...prev, projectType: type.value }))}
+                          className={`p-4 rounded-lg border transition-all ${
+                            wizardSelections.projectType === type.value
+                              ? 'border-amber-500 bg-amber-700/20 text-amber-200'
+                              : 'border-stone-700 bg-black/40 hover:bg-black/60 text-slate-200'
+                          }`}
+                        >
+                          <div className="text-2xl mb-2">{type.icon}</div>
+                          <div className="font-medium">{type.value}</div>
+                          <div className="text-xs text-stone-400 mt-1">{type.desc}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Development Methodology */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-amber-300 mb-4">Development Methodology</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {[
+                        { value: 'Agile/Scrum', desc: 'Iterative sprints' },
+                        { value: 'Waterfall', desc: 'Sequential phases' },
+                        { value: 'DevOps', desc: 'CI/CD focused' },
+                        { value: 'TDD', desc: 'Test-first approach' },
+                        { value: 'BDD', desc: 'Behavior-driven' },
+                        { value: 'DDD', desc: 'Domain-driven' },
+                        { value: 'Lean', desc: 'Minimal viable' },
+                        { value: 'RAD', desc: 'Rapid development' }
+                      ].map(method => (
+                        <button
+                          key={method.value}
+                          onClick={() => setWizardSelections(prev => ({ ...prev, methodology: method.value }))}
+                          className={`p-3 rounded-lg border transition-all ${
+                            wizardSelections.methodology === method.value
+                              ? 'border-amber-500 bg-amber-700/20 text-amber-200'
+                              : 'border-stone-700 bg-black/40 hover:bg-black/60 text-slate-200'
+                          }`}
+                        >
+                          <div className="font-medium text-sm">{method.value}</div>
+                          <div className="text-xs text-stone-400 mt-1">{method.desc}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Project Size */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-amber-300 mb-4">Project Size & Team</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {[
+                        { value: 'Prototype', icon: '🔬', desc: 'Proof of concept' },
+                        { value: 'Small', icon: '👤', desc: '1-3 developers' },
+                        { value: 'Medium', icon: '👥', desc: '4-10 developers' },
+                        { value: 'Large', icon: '🏢', desc: '10+ developers' }
+                      ].map(size => (
+                        <button
+                          key={size.value}
+                          onClick={() => setWizardSelections(prev => ({ ...prev, projectSize: size.value }))}
+                          className={`p-4 rounded-lg border transition-all ${
+                            wizardSelections.projectSize === size.value
+                              ? 'border-amber-500 bg-amber-700/20 text-amber-200'
+                              : 'border-stone-700 bg-black/40 hover:bg-black/60 text-slate-200'
+                          }`}
+                        >
+                          <div className="text-xl mb-1">{size.icon}</div>
+                          <div className="font-medium">{size.value}</div>
+                          <div className="text-xs text-stone-400 mt-1">{size.desc}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Timeframe */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-amber-300 mb-4">Development Timeframe</h3>
+                    <div className="grid grid-cols-3 gap-3">
+                      {[
+                        { value: 'MVP', icon: '⚡', desc: 'Quick launch (< 3 months)' },
+                        { value: 'Standard', icon: '📅', desc: 'Normal pace (3-6 months)' },
+                        { value: 'Enterprise', icon: '🏛️', desc: 'Long-term (6+ months)' }
+                      ].map(time => (
+                        <button
+                          key={time.value}
+                          onClick={() => setWizardSelections(prev => ({ ...prev, timeframe: time.value }))}
+                          className={`p-4 rounded-lg border transition-all ${
+                            wizardSelections.timeframe === time.value
+                              ? 'border-amber-500 bg-amber-700/20 text-amber-200'
+                              : 'border-stone-700 bg-black/40 hover:bg-black/60 text-slate-200'
+                          }`}
+                        >
+                          <div className="text-2xl mb-2">{time.icon}</div>
+                          <div className="font-medium">{time.value}</div>
+                          <div className="text-xs text-stone-400 mt-1">{time.desc}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Wizard Footer */}
+            <div className="p-6 border-t border-stone-700/30 bg-black/20">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-stone-400">
+                  {wizardStep === 1 && `${Object.values(wizardSelections).filter(v => v).length} of 4 selections made`}
+                  {wizardStep === 2 && `Technology stack configuration`}
+                  {wizardStep === 3 && `Architecture patterns selection`}
+                </div>
+                <div className="flex space-x-3">
+                  {wizardStep > 1 && (
+                    <button 
+                      onClick={() => setWizardStep(prev => prev - 1)}
+                      className="px-4 py-2 border border-stone-600 text-stone-300 rounded-lg hover:bg-stone-800 transition-colors flex items-center space-x-2"
+                    >
+                      <span>←</span>
+                      <span>Previous</span>
+                    </button>
+                  )}
+                  
+                  <button 
+                    onClick={() => setShowArchitectWizard(false)}
+                    className="px-4 py-2 border border-stone-600 text-stone-300 rounded-lg hover:bg-stone-800 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  
+                  <button 
+                    onClick={() => {
+                      // Apply all wizard selections to architecture options
+                      const finalOptions = {
+                        methodology: wizardSelections.methodology || 'Agile/Scrum',
+                        language: wizardSelections.language || 'TypeScript',
+                        frontend: wizardSelections.framework || 'React',
+                        backend: wizardSelections.backend || 'Express.js',
+                        database: wizardSelections.database || 'PostgreSQL',
+                        architecture: wizardSelections.projectSize === 'Large' ? 'Microservices' : 'Monolithic',
+                        testing: 'Jest',
+                        deployment: 'Docker',
+                        codeStyle: 'Standard',
+                        projectType: wizardSelections.projectType,
+                        projectSize: wizardSelections.projectSize,
+                        timeframe: wizardSelections.timeframe
+                      };
+                      setArchitectureOptions(finalOptions);
+                      setShowArchitectWizard(false);
+                    }}
+                    disabled={!wizardSelections.projectType}
+                    className="px-6 py-2 bg-gradient-to-r from-amber-700 to-orange-700 hover:from-amber-800 hover:to-orange-800 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors font-medium"
+                  >
+                    Apply & Generate
+                  </button>
+                  
+                  {wizardStep < 5 && (
+                    <button 
+                      onClick={() => setWizardStep(prev => prev + 1)}
+                      disabled={
+                        (wizardStep === 1 && !wizardSelections.projectType) ||
+                        (wizardStep === 2 && !wizardSelections.language)
+                      }
+                      className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors font-medium flex items-center space-x-2"
+                    >
+                      <span>Next Step</span>
+                      <span>→</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ShadowNexusChat;
