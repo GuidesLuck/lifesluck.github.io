@@ -1,0 +1,1926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#16181d" id="pc-theme-color" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="description" content="A productivity clock whose second hand counts down to the next minute." />
+  <title>Productivity Time</title>
+  
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22512%22%20height%3D%22512%22%20viewBox%3D%220%200%20512%20512%22%20role%3D%22img%22%20aria-label%3D%22Productivity%20Time%20clock%20icon%22%3E%0A%20%20%3Cdefs%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22bg%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%232c2c2e%22%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%221%22%20stop-color%3D%22%231c1c1e%22%2F%3E%0A%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%3ClinearGradient%20id%3D%22hand%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%220%22%20y2%3D%221%22%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%220%22%20stop-color%3D%22%23ff453a%22%2F%3E%0A%20%20%20%20%20%20%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23ff6b61%22%2F%3E%0A%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%3C%2Fdefs%3E%0A%0A%20%20%3C!--%20Dark%20rounded%20square%20background%20--%3E%0A%20%20%3Crect%20x%3D%220%22%20y%3D%220%22%20width%3D%22512%22%20height%3D%22512%22%20rx%3D%22112%22%20ry%3D%22112%22%20fill%3D%22url(%23bg)%22%2F%3E%0A%0A%20%20%3C!--%20Outer%20clock%20ring%20--%3E%0A%20%20%3Ccircle%20cx%3D%22256%22%20cy%3D%22256%22%20r%3D%22168%22%20fill%3D%22none%22%20stroke%3D%22%233a3a3c%22%20stroke-width%3D%2214%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22256%22%20cy%3D%22256%22%20r%3D%22168%22%20fill%3D%22%231c1c1e%22%2F%3E%0A%0A%20%20%3C!--%20Hour%20tick%20marks%20--%3E%0A%20%20%3Cg%20stroke%3D%22%238e8e93%22%20stroke-width%3D%2210%22%20stroke-linecap%3D%22round%22%3E%0A%20%20%20%20%3Cline%20x1%3D%22256%22%20y1%3D%22108%22%20x2%3D%22256%22%20y2%3D%22138%22%2F%3E%0A%20%20%20%20%3Cline%20x1%3D%22256%22%20y1%3D%22374%22%20x2%3D%22256%22%20y2%3D%22404%22%2F%3E%0A%20%20%20%20%3Cline%20x1%3D%22108%22%20y1%3D%22256%22%20x2%3D%22138%22%20y2%3D%22256%22%2F%3E%0A%20%20%20%20%3Cline%20x1%3D%22374%22%20y1%3D%22256%22%20x2%3D%22404%22%20y2%3D%22256%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%20%20%3Cg%20stroke%3D%22%235a5a5e%22%20stroke-width%3D%226%22%20stroke-linecap%3D%22round%22%3E%0A%20%20%20%20%3Cline%20x1%3D%22330%22%20y1%3D%22128%22%20x2%3D%22345%22%20y2%3D%22154%22%2F%3E%0A%20%20%20%20%3Cline%20x1%3D%22384%22%20y1%3D%22182%22%20x2%3D%22358%22%20y2%3D%22197%22%2F%3E%0A%20%20%20%20%3Cline%20x1%3D%22384%22%20y1%3D%22330%22%20x2%3D%22358%22%20y2%3D%22315%22%2F%3E%0A%20%20%20%20%3Cline%20x1%3D%22330%22%20y1%3D%22384%22%20x2%3D%22345%22%20y2%3D%22358%22%2F%3E%0A%20%20%20%20%3Cline%20x1%3D%22182%22%20y1%3D%22384%22%20x2%3D%22167%22%20y2%3D%22358%22%2F%3E%0A%20%20%20%20%3Cline%20x1%3D%22128%22%20y1%3D%22330%22%20x2%3D%22154%22%20y2%3D%22315%22%2F%3E%0A%20%20%20%20%3Cline%20x1%3D%22128%22%20y1%3D%22182%22%20x2%3D%22154%22%20y2%3D%22197%22%2F%3E%0A%20%20%20%20%3Cline%20x1%3D%22182%22%20y1%3D%22128%22%20x2%3D%22167%22%20y2%3D%22154%22%2F%3E%0A%20%20%3C%2Fg%3E%0A%0A%20%20%3C!--%20Hour%20hand%20pointing%20up%20--%3E%0A%20%20%3Cline%20x1%3D%22256%22%20y1%3D%22256%22%20x2%3D%22256%22%20y2%3D%22170%22%20stroke%3D%22%23f2f2f7%22%20stroke-width%3D%2216%22%20stroke-linecap%3D%22round%22%2F%3E%0A%20%20%3C!--%20Minute%20hand%20--%3E%0A%20%20%3Cline%20x1%3D%22256%22%20y1%3D%22256%22%20x2%3D%22336%22%20y2%3D%22200%22%20stroke%3D%22%23f2f2f7%22%20stroke-width%3D%2212%22%20stroke-linecap%3D%22round%22%2F%3E%0A%0A%20%20%3C!--%20Second%20hand%20(countdown%20vibe)%2C%20red%2C%20pointing%20toward%208%20o'clock%20sweep%20--%3E%0A%20%20%3Cline%20x1%3D%22256%22%20y1%3D%22256%22%20x2%3D%22188%22%20y2%3D%22332%22%20stroke%3D%22url(%23hand)%22%20stroke-width%3D%228%22%20stroke-linecap%3D%22round%22%2F%3E%0A%20%20%3C!--%20Counterweight%20tail%20--%3E%0A%20%20%3Cline%20x1%3D%22256%22%20y1%3D%22256%22%20x2%3D%22274%22%20y2%3D%22236%22%20stroke%3D%22url(%23hand)%22%20stroke-width%3D%228%22%20stroke-linecap%3D%22round%22%2F%3E%0A%0A%20%20%3C!--%20Center%20cap%20--%3E%0A%20%20%3Ccircle%20cx%3D%22256%22%20cy%3D%22256%22%20r%3D%2216%22%20fill%3D%22%23ff453a%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22256%22%20cy%3D%22256%22%20r%3D%227%22%20fill%3D%22%231c1c1e%22%2F%3E%0A%3C%2Fsvg%3E%0A" />
+  
+  <style>
+/* ==========================================================================
+   Productivity Clock — styles.css
+   Mobile-first (Android) vanilla PWA clock. Clean, minimal "productivity"
+   aesthetic. Themes set CSS custom properties on .pc-root.theme-<id>.
+   ========================================================================== */
+
+/* ---------- Reset / base ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  /* avoid pull-to-refresh / rubber-banding fighting the fixed layout */
+  overscroll-behavior: none;
+  background: var(--pc-bg, #16181d);
+}
+
+/* Sensible default sans stack (overridden per-theme via --pc-font). */
+:root {
+  --pc-font-sans: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Inter,
+    system-ui, sans-serif;
+  --pc-font-mono: ui-monospace, "Cascadia Code", "JetBrains Mono", Consolas,
+    monospace;
+
+  /* layout tokens */
+  --pc-tap: 48px;        /* thumb-friendly minimum (>=44px) */
+  --pc-radius: 14px;
+  --pc-gap: 16px;
+  --pc-maxw: 560px;
+
+  /* fallbacks so anything renders before a theme class lands */
+  --pc-bg: #16181d;
+  --pc-surface: #1e2129;
+  --pc-text: #e9ecf1;
+  --pc-muted: #8a90a0;
+  --pc-accent: #f5a623;
+  --pc-face: #1e2129;
+  --pc-tick: #555c6b;
+  --pc-hour: #e9ecf1;
+  --pc-minute: #e9ecf1;
+  --pc-second: #f5a623;
+  --pc-font: var(--pc-font-sans);
+}
+
+/* ==========================================================================
+   THEMES — each sets every required variable.
+   ========================================================================== */
+
+/* Deep Focus — dark charcoal, soft white, amber accent */
+.pc-root.theme-focus {
+  --pc-bg: #16181d;
+  --pc-surface: #21242d;
+  --pc-text: #eceef3;
+  --pc-muted: #888fa1;
+  --pc-accent: #f5a623;
+  --pc-face: #1c1f27;
+  --pc-tick: #4a505e;
+  --pc-hour: #eceef3;
+  --pc-minute: #eceef3;
+  --pc-second: #f5a623;
+  --pc-font: var(--pc-font-sans);
+}
+
+/* Paper — warm off-white, near-black text, blue accent, very minimal */
+.pc-root.theme-paper {
+  --pc-bg: #f6f3ec;
+  --pc-surface: #fffdf8;
+  --pc-text: #1b1b1a;
+  --pc-muted: #6f6c64;
+  --pc-accent: #2f6fed;
+  --pc-face: #fffdf8;
+  --pc-tick: #c9c4b8;
+  --pc-hour: #1b1b1a;
+  --pc-minute: #1b1b1a;
+  --pc-second: #2f6fed;
+  --pc-font: var(--pc-font-sans);
+}
+
+/* Terminal — black bg, phosphor green mono everything */
+.pc-root.theme-terminal {
+  --pc-bg: #000000;
+  --pc-surface: #0a120a;
+  --pc-text: #33ff66;
+  --pc-muted: #1f9b43;
+  --pc-accent: #66ff99;
+  --pc-face: #050a05;
+  --pc-tick: #1c6b34;
+  --pc-hour: #33ff66;
+  --pc-minute: #33ff66;
+  --pc-second: #66ff99;
+  --pc-font: var(--pc-font-mono);
+}
+
+/* Nord — cool slate/blue palette */
+.pc-root.theme-nord {
+  --pc-bg: #2e3440;
+  --pc-surface: #3b4252;
+  --pc-text: #eceff4;
+  --pc-muted: #9aa4b8;
+  --pc-accent: #88c0d0;
+  --pc-face: #353b48;
+  --pc-tick: #4c566a;
+  --pc-hour: #eceff4;
+  --pc-minute: #d8dee9;
+  --pc-second: #88c0d0;
+  --pc-font: var(--pc-font-sans);
+}
+
+/* Warm — solarized-style warm light */
+.pc-root.theme-warm {
+  --pc-bg: #fdf6e3;
+  --pc-surface: #fffaf0;
+  --pc-text: #586e75;
+  --pc-muted: #93a1a1;
+  --pc-accent: #cb4b16;
+  --pc-face: #fbf1d7;
+  --pc-tick: #d9cda7;
+  --pc-hour: #586e75;
+  --pc-minute: #657b83;
+  --pc-second: #cb4b16;
+  --pc-font: var(--pc-font-sans);
+}
+
+/* ==========================================================================
+   ROOT LAYOUT — full-screen flex column, theme vars applied.
+   ========================================================================== */
+
+.pc-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh; /* dynamic viewport for Android browser chrome */
+  width: 100%;
+  margin: 0 auto;
+  max-width: var(--pc-maxw);
+
+  background-color: var(--pc-bg);
+  color: var(--pc-text);
+  font-family: var(--pc-font);
+  font-size: 16px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+
+  /* safe-area aware padding (Android notches / gesture bar) */
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+
+  /* subtle, smooth theme-change transition */
+  transition: background-color 0.35s ease, color 0.35s ease;
+}
+
+/* ---------- Clock area: centered, fills the space above the menu ---------- */
+.pc-clock-area {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: var(--pc-gap);
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   ANALOG CLOCK — SVG #pc-analog. Hand colors driven by theme vars.
+   ========================================================================== */
+
+#pc-analog {
+  display: block;
+  width: min(78vw, 78vh, 420px);
+  height: auto;
+  aspect-ratio: 1 / 1;
+  transition: filter 0.35s ease;
+}
+
+/* Conventional class hooks for SVG children so JS can render simple shapes
+   and inherit theme colors without inline styles. */
+#pc-analog .pc-face {
+  fill: var(--pc-face);
+  stroke: var(--pc-tick);
+  stroke-width: 1;
+  transition: fill 0.35s ease, stroke 0.35s ease;
+}
+
+#pc-analog .pc-tick {
+  stroke: var(--pc-tick);
+  stroke-linecap: round;
+  transition: stroke 0.35s ease;
+}
+
+#pc-analog .pc-tick--major {
+  stroke: var(--pc-muted);
+}
+
+#pc-analog .pc-numeral {
+  fill: var(--pc-muted);
+  font-family: var(--pc-font);
+  font-size: 7px;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+#pc-analog .pc-hand {
+  stroke-linecap: round;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: stroke 0.35s ease;
+}
+
+#pc-analog .pc-hand-hour {
+  stroke: var(--pc-hour);
+  stroke-width: 5;
+}
+
+#pc-analog .pc-hand-minute {
+  stroke: var(--pc-minute);
+  stroke-width: 3.25;
+}
+
+/* Seconds hand: thinner + accent color, visually distinct */
+#pc-analog .pc-hand-second {
+  stroke: var(--pc-second);
+  stroke-width: 1.25;
+}
+
+#pc-analog .pc-cap {
+  fill: var(--pc-second);
+  stroke: var(--pc-face);
+  stroke-width: 1;
+}
+
+/* ==========================================================================
+   DIGITAL CLOCK — big tabular readout.
+   ========================================================================== */
+
+.pc-digital {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.4em;
+  width: 100%;
+}
+
+.pc-digital-time {
+  font-family: var(--pc-font);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  color: var(--pc-text);
+  /* fluid + huge, capped so it never overflows narrow phones */
+  font-size: clamp(3.5rem, 22vw, 7.5rem);
+  transition: color 0.35s ease;
+}
+
+.pc-digital-meta {
+  font-family: var(--pc-font);
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(0.95rem, 4.5vw, 1.35rem);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pc-muted);
+  transition: color 0.35s ease;
+}
+
+/* Terminal theme: a touch of glow for the phosphor look */
+.pc-root.theme-terminal .pc-digital-time {
+  text-shadow: 0 0 12px rgba(51, 255, 102, 0.35);
+}
+
+/* ==========================================================================
+   BOTTOM MENU — thumb-friendly control bar with subtle backdrop.
+   ========================================================================== */
+
+.pc-menu {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--pc-gap);
+  width: 100%;
+  padding: var(--pc-gap);
+  /* keep clear of the Android gesture bar */
+  padding-bottom: calc(var(--pc-gap) + env(safe-area-inset-bottom, 0px));
+
+  background-color: color-mix(in srgb, var(--pc-surface) 88%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
+  backdrop-filter: blur(14px) saturate(120%);
+  border-top: 1px solid color-mix(in srgb, var(--pc-text) 10%, transparent);
+
+  transition: background-color 0.35s ease, border-color 0.35s ease;
+}
+
+/* Fallback for engines without color-mix(): solid surface. */
+@supports not (background: color-mix(in srgb, red, blue)) {
+  .pc-menu {
+    background-color: var(--pc-surface);
+    border-top: 1px solid var(--pc-tick);
+  }
+}
+
+/* ==========================================================================
+   GENERIC CONTROLS — buttons, selects, inputs, cards, lists.
+   ========================================================================== */
+
+.pc-btn,
+.pc-select,
+.pc-input {
+  min-height: var(--pc-tap);
+  font-family: var(--pc-font);
+  font-size: 1rem;
+  color: var(--pc-text);
+  background-color: var(--pc-surface);
+  border: 1px solid color-mix(in srgb, var(--pc-text) 14%, transparent);
+  border-radius: var(--pc-radius);
+  padding: 0 16px;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  transition: background-color 0.2s ease, border-color 0.2s ease,
+    color 0.2s ease, transform 0.05s ease;
+}
+
+.pc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: var(--pc-tap);
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.pc-btn:active {
+  transform: scale(0.97);
+}
+
+/* Primary / accented button */
+.pc-btn--primary {
+  background-color: var(--pc-accent);
+  border-color: var(--pc-accent);
+  color: var(--pc-bg);
+}
+
+/* Ghost button — minimal, text-only */
+.pc-btn--ghost {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--pc-muted);
+}
+
+.pc-btn--ghost:active {
+  color: var(--pc-text);
+}
+
+.pc-select {
+  /* leave room for the native dropdown arrow we draw below */
+  padding-right: 40px;
+  background-image: linear-gradient(45deg, transparent 50%, var(--pc-muted) 50%),
+    linear-gradient(135deg, var(--pc-muted) 50%, transparent 50%);
+  background-position: calc(100% - 18px) center, calc(100% - 13px) center;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+.pc-input::placeholder {
+  color: var(--pc-muted);
+}
+
+/* Focus ring (keyboard accessibility, also useful on Android phys. kbd) */
+.pc-btn:focus-visible,
+.pc-select:focus-visible,
+.pc-input:focus-visible {
+  border-color: var(--pc-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pc-accent) 35%, transparent);
+}
+
+/* ---------- Card ---------- */
+.pc-card {
+  background-color: var(--pc-surface);
+  color: var(--pc-text);
+  border: 1px solid color-mix(in srgb, var(--pc-text) 8%, transparent);
+  border-radius: var(--pc-radius);
+  padding: var(--pc-gap);
+  transition: background-color 0.35s ease, border-color 0.35s ease;
+}
+
+/* ---------- List ---------- */
+.pc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.pc-list-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--pc-tap);
+  padding: 10px 14px;
+  color: var(--pc-text);
+  border-bottom: 1px solid color-mix(in srgb, var(--pc-text) 8%, transparent);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pc-list-item:last-child {
+  border-bottom: none;
+}
+
+.pc-list-item--active {
+  color: var(--pc-accent);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   RESPONSIVE — give larger phones / landscape more breathing room.
+   ========================================================================== */
+
+@media (min-width: 480px) {
+  .pc-root {
+    font-size: 17px;
+  }
+  .pc-menu {
+    flex-wrap: nowrap;
+    justify-content: center;
+  }
+}
+
+/* Landscape: place analog/digital and menu side-considerations — keep menu
+   compact so the clock stays the focus. */
+@media (orientation: landscape) and (max-height: 480px) {
+  .pc-clock-area {
+    padding: 8px;
+  }
+  #pc-analog {
+    width: min(60vh, 320px);
+  }
+  .pc-digital-time {
+    font-size: clamp(3rem, 16vh, 6rem);
+  }
+  .pc-menu {
+    padding: 8px calc(8px + env(safe-area-inset-right, 0px)) 8px
+      calc(8px + env(safe-area-inset-left, 0px));
+  }
+}
+
+/* ==========================================================================
+   MOTION — honor reduced-motion users (disables theme/hand transitions).
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.001ms !important;
+  }
+}
+
+</style>
+  <style>
+    /* Integrator-owned UI: the Tools sheet + a few helpers, built on the
+       design system's tokens/vars so it inherits every theme automatically. */
+    .pc-sheet-backdrop {
+      position: fixed; inset: 0; z-index: 40;
+      background: rgba(0, 0, 0, 0.5);
+      -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+    }
+    .pc-sheet {
+      position: fixed; left: 50%; bottom: 0; z-index: 50;
+      transform: translateX(-50%);
+      width: 100%; max-width: var(--pc-maxw);
+      max-height: 86dvh; overflow-y: auto;
+      display: flex; flex-direction: column; gap: var(--pc-gap);
+      padding: var(--pc-gap);
+      padding-bottom: calc(var(--pc-gap) + env(safe-area-inset-bottom, 0px));
+      background: var(--pc-bg); color: var(--pc-text);
+      border-top-left-radius: 20px; border-top-right-radius: 20px;
+      border: 1px solid color-mix(in srgb, var(--pc-text) 12%, transparent);
+      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.45);
+    }
+    .pc-sheet[hidden], .pc-sheet-backdrop[hidden] { display: none; }
+    .pc-sheet-head { display: flex; align-items: center; justify-content: space-between; }
+    .pc-sheet-head h2 { margin: 0; font-size: 1.25rem; }
+    .pc-card h3 { margin: 0 0 12px; font-size: 1.05rem; color: var(--pc-text); }
+    .pc-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+    .pc-row .pc-input { flex: 1 1 120px; min-width: 0; }
+    .pc-till-display {
+      font-variant-numeric: tabular-nums; font-weight: 600;
+      font-size: clamp(1.5rem, 9vw, 2.4rem); text-align: center;
+      color: var(--pc-accent); margin: 12px 0;
+    }
+    .pc-alarm-meta { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; }
+    .pc-alarm-time { font-weight: 700; font-variant-numeric: tabular-nums; }
+    .pc-alarm-label { color: var(--pc-muted); font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pc-alarm-off .pc-alarm-time, .pc-alarm-off .pc-alarm-label { opacity: 0.4; }
+    .pc-icon-btn {
+      min-width: 40px; min-height: 40px; padding: 0 10px;
+      border-radius: 10px; border: 1px solid color-mix(in srgb, var(--pc-text) 14%, transparent);
+      background: var(--pc-surface); color: var(--pc-text); cursor: pointer; font-size: 0.85rem;
+    }
+    .pc-empty { color: var(--pc-muted); font-size: 0.9rem; padding: 8px 0; }
+    .pc-toast {
+      position: fixed; left: 50%; top: calc(12px + env(safe-area-inset-top, 0px));
+      transform: translateX(-50%); z-index: 60;
+      background: var(--pc-accent); color: var(--pc-bg);
+      font-weight: 700; padding: 12px 18px; border-radius: var(--pc-radius);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); max-width: 90vw;
+    }
+    .pc-toast[hidden] { display: none; }
+    a.pc-btn { text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="pc-root theme-focus" id="pc-root">
+    <main class="pc-clock-area" id="pc-clock-area">
+      <svg id="pc-analog" viewBox="0 0 200 200" role="img" aria-label="Analog clock"></svg>
+      <div class="pc-digital" id="pc-digital" hidden>
+        <div class="pc-digital-time" id="pc-digital-time">00:00:00</div>
+        <div class="pc-digital-meta" id="pc-digital-meta"></div>
+      </div>
+    </main>
+
+    <nav class="pc-menu" id="pc-menu">
+      <button class="pc-btn" id="pc-view-toggle" type="button">Digital</button>
+      <select class="pc-select" id="pc-direction" aria-label="Hand direction">
+        <option value="normal">Normal</option>
+        <option value="reverseSeconds">Reverse seconds</option>
+        <option value="reverseAll">Reverse all</option>
+      </select>
+      <select class="pc-select" id="pc-theme" aria-label="Theme"></select>
+      <button class="pc-btn" id="pc-tools-btn" type="button">Tools</button>
+      <button class="pc-btn pc-btn--primary" id="pc-install" type="button" hidden>Install</button>
+    </nav>
+  </div>
+
+  <div class="pc-sheet-backdrop" id="pc-sheet-backdrop" hidden></div>
+  <aside class="pc-sheet" id="pc-sheet" hidden aria-label="Tools">
+    <div class="pc-sheet-head">
+      <h2>Tools</h2>
+      <button class="pc-btn pc-btn--ghost" id="pc-sheet-close" type="button">Close</button>
+    </div>
+
+    <section class="pc-card">
+      <h3>Alarms</h3>
+      <button class="pc-btn pc-btn--ghost" id="pc-notif-btn" type="button">Enable notifications</button>
+      <div class="pc-row" style="margin-top:12px">
+        <input class="pc-input" id="pc-alarm-time" type="time" aria-label="Alarm time" />
+        <input class="pc-input" id="pc-alarm-label" type="text" placeholder="Label (optional)" aria-label="Alarm label" />
+        <button class="pc-btn pc-btn--primary" id="pc-alarm-add" type="button">Add</button>
+      </div>
+      <ul class="pc-list" id="pc-alarm-list"></ul>
+    </section>
+
+    <section class="pc-card">
+      <h3>How much time till…</h3>
+      <input class="pc-input" id="pc-till-target" type="datetime-local" aria-label="Target date and time" style="width:100%" />
+      <div class="pc-till-display" id="pc-till-display">—</div>
+      <a class="pc-btn pc-btn--primary" id="pc-till-gcal" target="_blank" rel="noopener" aria-disabled="true">Add to Google Calendar</a>
+    </section>
+  </aside>
+
+  <div class="pc-toast" id="pc-toast" hidden></div>
+
+  <script>
+/* Productivity Clock — theme registry.
+ * Each entry maps a theme id (CSS class `.theme-<id>` on `.pc-root`) to its
+ * display name. Order here is display order in the picker.
+ */
+window.PC_THEMES = [
+  { id: "focus", name: "Deep Focus" },
+  { id: "paper", name: "Paper" },
+  { id: "terminal", name: "Terminal" },
+  { id: "nord", name: "Nord" },
+  { id: "warm", name: "Warm" },
+];
+
+</script>
+  <script>
+/**
+ * ClockEngine — Productivity Clock rendering/animation engine.
+ *
+ * Vanilla JS, dependency-free, no build step, no modules. Exposes a single
+ * global: window.ClockEngine.
+ *
+ * Conventions used throughout:
+ *  - The analog clock lives inside an <svg viewBox="0 0 200 200">.
+ *  - Center is (100, 100); face radius is ~92.
+ *  - Angles are in DEGREES, with 12 o'clock = 0deg and clockwise positive.
+ *    This matches SVG's rotate(<deg> cx cy) which rotates clockwise for
+ *    positive values in the default coordinate system.
+ *  - All theme-able colors are expressed via CSS custom properties so that
+ *    a stylesheet/theme can restyle the clock without touching this engine:
+ *      --pc-face   face fill
+ *      --pc-tick   minute/hour ticks
+ *      --pc-text   hour numerals
+ *      --pc-hour   hour hand
+ *      --pc-minute minute hand
+ *      --pc-second second hand
+ */
+(function (global) {
+  'use strict';
+
+  // ---- Geometry constants -------------------------------------------------
+  var CENTER = 100;     // cx / cy
+  var RADIUS = 92;      // face radius
+  var SVG_NS = 'http://www.w3.org/2000/svg';
+
+  // ---- Small DOM helpers --------------------------------------------------
+
+  /**
+   * Create an SVG element in the SVG namespace and apply the given attributes.
+   * @param {string} name - tag name (e.g. 'circle', 'line', 'text')
+   * @param {Object} [attrs] - attribute name/value pairs
+   * @returns {SVGElement}
+   */
+  function el(name, attrs) {
+    var node = document.createElementNS(SVG_NS, name);
+    if (attrs) {
+      for (var key in attrs) {
+        if (Object.prototype.hasOwnProperty.call(attrs, key)) {
+          node.setAttribute(key, attrs[key]);
+        }
+      }
+    }
+    return node;
+  }
+
+  /**
+   * Convert a clock angle (degrees, 0 = 12 o'clock, clockwise positive)
+   * into an {x, y} point on a circle of the given radius around center.
+   * Used for laying out static geometry (ticks, numerals).
+   * @param {number} angleDeg
+   * @param {number} r
+   * @returns {{x:number, y:number}}
+   */
+  function pointOnCircle(angleDeg, r) {
+    // Convert "12 o'clock = 0, clockwise" to standard math radians.
+    // Standard math: 0rad points +x (3 o'clock), counter-clockwise positive.
+    // Our 0deg points up (-y) and goes clockwise, so:
+    var rad = (angleDeg - 90) * Math.PI / 180;
+    return {
+      x: CENTER + r * Math.cos(rad),
+      y: CENTER + r * Math.sin(rad)
+    };
+  }
+
+  // ---- Public: buildAnalog -----------------------------------------------
+
+  /**
+   * Populate an existing empty <svg viewBox="0 0 200 200"> with a full analog
+   * clock face: face circle, 60 minute ticks (12 thicker hour ticks), hour
+   * numerals 1-12, three hands, and a center cap.
+   *
+   * Hands are created so that applying transform="rotate(<deg> 100 100)"
+   * orients them correctly (each hand is drawn pointing straight up at 0deg).
+   *
+   * Hand element ids:
+   *   #pc-hand-hour  #pc-hand-minute  #pc-hand-second
+   *
+   * @param {SVGSVGElement} svgEl - the target empty SVG element
+   * @returns {SVGSVGElement} the same element (for chaining)
+   */
+  function buildAnalog(svgEl) {
+    if (!svgEl) {
+      throw new Error('ClockEngine.buildAnalog: svgEl is required');
+    }
+
+    // Ensure a sane viewBox even if the caller forgot to set one.
+    if (!svgEl.getAttribute('viewBox')) {
+      svgEl.setAttribute('viewBox', '0 0 200 200');
+    }
+
+    // Clear any prior content so the call is idempotent.
+    while (svgEl.firstChild) {
+      svgEl.removeChild(svgEl.firstChild);
+    }
+
+    // --- Face circle ---
+    svgEl.appendChild(el('circle', {
+      cx: CENTER,
+      cy: CENTER,
+      r: RADIUS,
+      fill: 'var(--pc-face)',
+      stroke: 'var(--pc-tick)',
+      'stroke-width': 2
+    }));
+
+    // --- Minute / hour ticks ---
+    // 60 ticks total; every 5th tick (hours) is longer and thicker.
+    var ticks = el('g', { 'stroke-linecap': 'round' });
+    for (var i = 0; i < 60; i++) {
+      var isHour = (i % 5 === 0);
+      var angle = i * 6; // 360 / 60
+      // Tick lengths measured inward from the rim.
+      var outer = pointOnCircle(angle, RADIUS - 2);
+      var inner = pointOnCircle(angle, RADIUS - (isHour ? 10 : 5));
+      ticks.appendChild(el('line', {
+        x1: outer.x.toFixed(3),
+        y1: outer.y.toFixed(3),
+        x2: inner.x.toFixed(3),
+        y2: inner.y.toFixed(3),
+        stroke: 'var(--pc-tick)',
+        'stroke-width': isHour ? 2.4 : 1
+      }));
+    }
+    svgEl.appendChild(ticks);
+
+    // --- Hour numerals 1-12 ---
+    var numerals = el('g', {
+      'font-family': 'system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
+      'font-size': 13,
+      'font-weight': 600,
+      'text-anchor': 'middle',
+      fill: 'var(--pc-text)'
+    });
+    var numeralRadius = RADIUS - 22;
+    for (var n = 1; n <= 12; n++) {
+      var pos = pointOnCircle(n * 30, numeralRadius);
+      var label = el('text', {
+        x: pos.x.toFixed(3),
+        // dominant-baseline keeps text vertically centered on its point;
+        // a small dy fallback helps engines that ignore it.
+        y: pos.y.toFixed(3),
+        'dominant-baseline': 'central'
+      });
+      label.textContent = String(n);
+      numerals.appendChild(label);
+    }
+    svgEl.appendChild(numerals);
+
+    // --- Hands ---
+    // Each hand points straight up (toward 12) at 0deg, anchored at center,
+    // so a rotate(angle 100 100) transform aims it. We use <line> for hour
+    // and minute, and a <line> with an extended tail for the second hand.
+
+    // Hour hand: short, thick.
+    svgEl.appendChild(el('line', {
+      id: 'pc-hand-hour',
+      x1: CENTER,
+      y1: CENTER + 8,          // small tail behind the center
+      x2: CENTER,
+      y2: CENTER - 50,         // length toward 12
+      stroke: 'var(--pc-hour)',
+      'stroke-width': 5,
+      'stroke-linecap': 'round',
+      transform: 'rotate(0 100 100)'
+    }));
+
+    // Minute hand: longer, medium.
+    svgEl.appendChild(el('line', {
+      id: 'pc-hand-minute',
+      x1: CENTER,
+      y1: CENTER + 12,
+      x2: CENTER,
+      y2: CENTER - 72,
+      stroke: 'var(--pc-minute)',
+      'stroke-width': 3.2,
+      'stroke-linecap': 'round',
+      transform: 'rotate(0 100 100)'
+    }));
+
+    // Second hand: longest, thin, with a visible counterweight tail.
+    svgEl.appendChild(el('line', {
+      id: 'pc-hand-second',
+      x1: CENTER,
+      y1: CENTER + 18,
+      x2: CENTER,
+      y2: CENTER - 80,
+      stroke: 'var(--pc-second)',
+      'stroke-width': 1.4,
+      'stroke-linecap': 'round',
+      transform: 'rotate(0 100 100)'
+    }));
+
+    // --- Center cap ---
+    svgEl.appendChild(el('circle', {
+      cx: CENTER,
+      cy: CENTER,
+      r: 3.4,
+      fill: 'var(--pc-second)',
+      stroke: 'var(--pc-face)',
+      'stroke-width': 1
+    }));
+
+    return svgEl;
+  }
+
+  // ---- Angle computation (shared by updateAnalog) -------------------------
+
+  /**
+   * Compute smooth forward (clockwise) angles for all three hands.
+   * @param {Date} date
+   * @returns {{hour:number, minute:number, second:number}}
+   */
+  function computeAngles(date) {
+    var h = date.getHours();
+    var m = date.getMinutes();
+    var s = date.getSeconds();
+    var ms = date.getMilliseconds();
+
+    return {
+      // 30deg per hour, plus fractional progress from minutes/seconds.
+      hour: ((h % 12) + m / 60 + s / 3600) * 30,
+      // 6deg per minute, plus fractional progress from seconds.
+      minute: (m + s / 60) * 6,
+      // 6deg per second, plus fractional progress from ms (smooth sweep).
+      second: (s + ms / 1000) * 6
+    };
+  }
+
+  // ---- Public: updateAnalog ----------------------------------------------
+
+  /**
+   * Update the three hand transforms for the given time. Intended to be called
+   * once per animation frame for a smooth sweep.
+   *
+   * Modes (via opts):
+   *   reverseSeconds: only the second hand counts down / sweeps CCW.
+   *   reverseAll:     all three hands sweep CCW. Wins if both flags set.
+   *
+   * @param {Date} date
+   * @param {{reverseSeconds?:boolean, reverseAll?:boolean}} [opts]
+   */
+  function updateAnalog(date, opts) {
+    opts = opts || {};
+    var reverseAll = !!opts.reverseAll;
+    // reverseAll wins; reverseSeconds only applies when reverseAll is off.
+    var reverseSeconds = !reverseAll && !!opts.reverseSeconds;
+
+    var a = computeAngles(date);
+
+    var hourAngle = a.hour;
+    var minuteAngle = a.minute;
+    var secondAngle = a.second;
+
+    if (reverseAll) {
+      // Mirror every hand to sweep counter-clockwise.
+      hourAngle = 360 - hourAngle;
+      minuteAngle = 360 - minuteAngle;
+      secondAngle = 360 - secondAngle;
+    } else if (reverseSeconds) {
+      // Only the second hand counts down toward the next minute. At :00 it's
+      // at the top (360 -> rendered as top) and sweeps backward, arriving at
+      // the top again at the next :00.
+      secondAngle = 360 - secondAngle;
+    }
+
+    applyHand('pc-hand-hour', hourAngle);
+    applyHand('pc-hand-minute', minuteAngle);
+    applyHand('pc-hand-second', secondAngle);
+  }
+
+  // Cache hand lookups so we don't query the DOM every frame.
+  var handCache = {};
+
+  /**
+   * Apply a rotation transform to a hand by id, with light caching.
+   * @param {string} id
+   * @param {number} angleDeg
+   */
+  function applyHand(id, angleDeg) {
+    var node = handCache[id];
+    if (!node || !node.isConnected) {
+      node = document.getElementById(id);
+      handCache[id] = node;
+    }
+    if (node) {
+      node.setAttribute(
+        'transform',
+        'rotate(' + angleDeg.toFixed(3) + ' 100 100)'
+      );
+    }
+  }
+
+  // ---- Public: formatDigital ---------------------------------------------
+
+  /**
+   * Format a Date for the digital readout.
+   *
+   * In reverse modes (reverseSeconds OR reverseAll), the seconds field shows
+   * the countdown to the next minute (60 - seconds), where 60 is shown as 00.
+   *
+   * @param {Date} date
+   * @param {{reverseSeconds?:boolean, reverseAll?:boolean}} [opts]
+   * @returns {{hh:string, mm:string, ss:string, hh12:string,
+   *            ampm:string, display:string}}
+   */
+  function formatDigital(date, opts) {
+    opts = opts || {};
+    var reverse = !!opts.reverseSeconds || !!opts.reverseAll;
+
+    var h24 = date.getHours();
+    var m = date.getMinutes();
+    var s = date.getSeconds();
+
+    // Seconds value depends on mode.
+    var secValue;
+    if (reverse) {
+      secValue = 60 - s;     // countdown to next minute
+      if (secValue === 60) { // when real seconds == 0 -> show 00, not 60
+        secValue = 0;
+      }
+    } else {
+      secValue = s;
+    }
+
+    // 12-hour conversion.
+    var h12 = h24 % 12;
+    if (h12 === 0) { h12 = 12; }
+    var ampm = h24 < 12 ? 'AM' : 'PM';
+
+    var hh = pad2(h24);
+    var mm = pad2(m);
+    var ss = pad2(secValue);
+
+    return {
+      hh: hh,
+      mm: mm,
+      ss: ss,
+      hh12: pad2(h12),
+      ampm: ampm,
+      display: hh + ':' + mm + ':' + ss
+    };
+  }
+
+  /**
+   * Zero-pad a non-negative integer to two digits.
+   * @param {number} v
+   * @returns {string}
+   */
+  function pad2(v) {
+    return String(v).padStart(2, '0');
+  }
+
+  // ---- Export -------------------------------------------------------------
+  global.ClockEngine = {
+    buildAnalog: buildAnalog,
+    updateAnalog: updateAnalog,
+    formatDigital: formatDigital
+  };
+
+})(typeof window !== 'undefined' ? window : this);
+
+</script>
+  <script>
+/*
+ * features.js — Productivity Clock feature layer
+ *
+ * Exposes three dependency-free globals:
+ *   window.Alarms    — alarm manager (localStorage-backed, notifications, sound, vibrate)
+ *   window.Countdown — pure countdown helpers
+ *   window.GCal      — Google Calendar deep-link builders
+ *
+ * Vanilla JS only. No frameworks, no imports, no audio files.
+ * All access to browser-only objects (window, Notification, navigator) is
+ * guarded so this file is safe to load anywhere and passes `node --check`.
+ */
+(function () {
+  "use strict";
+
+  // A safe reference to the global object that works in browsers and node.
+  var GLOBAL =
+    (typeof window !== "undefined" && window) ||
+    (typeof globalThis !== "undefined" && globalThis) ||
+    {};
+
+  /* =======================================================================
+   * Small shared helpers
+   * ===================================================================== */
+
+  // Zero-pad a number to 2 digits.
+  function pad2(n) {
+    n = Math.floor(Math.abs(n));
+    return (n < 10 ? "0" : "") + n;
+  }
+
+  // Format a Date as "HH:MM" in local time.
+  function toHHMM(date) {
+    return pad2(date.getHours()) + ":" + pad2(date.getMinutes());
+  }
+
+  // Best-effort localStorage accessors (guarded — may be unavailable / blocked).
+  function lsGet(key) {
+    try {
+      if (typeof localStorage !== "undefined") {
+        return localStorage.getItem(key);
+      }
+    } catch (e) {
+      /* access denied or unavailable */
+    }
+    return null;
+  }
+  function lsSet(key, value) {
+    try {
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem(key, value);
+      }
+    } catch (e) {
+      /* quota / privacy mode — ignore */
+    }
+  }
+
+  /* =======================================================================
+   * 1) Alarms
+   * ===================================================================== */
+
+  var ALARMS_KEY = "pc_alarms";
+
+  // In-memory cache of the alarm list.
+  var _alarms = null;
+
+  // Dedupe set so each alarm fires at most once per "minute key".
+  // Entries look like "<alarmId>@<YYYY-MM-DD-HH:MM>".
+  var _firedThisMinute = new Set();
+
+  // Load alarms from localStorage (parsed once, then cached).
+  function loadAlarms() {
+    if (_alarms) return _alarms;
+    var raw = lsGet(ALARMS_KEY);
+    if (raw) {
+      try {
+        var parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          _alarms = parsed;
+          return _alarms;
+        }
+      } catch (e) {
+        /* corrupt data — start fresh */
+      }
+    }
+    _alarms = [];
+    return _alarms;
+  }
+
+  // Persist the current alarm list.
+  function saveAlarms() {
+    lsSet(ALARMS_KEY, JSON.stringify(loadAlarms()));
+  }
+
+  // Generate a unique-enough id.
+  function makeId() {
+    return String(Date.now()) + "-" + Math.random().toString(36).slice(2, 10);
+  }
+
+  /*
+   * WebAudio beep generator.
+   * Plays a short repeating beep using OscillatorNode — no audio assets.
+   * Fully self-contained and guarded; returns silently if WebAudio is absent.
+   */
+  function playAlarmSound(opts) {
+    opts = opts || {};
+    var beeps = opts.beeps || 4; // number of beeps
+    var beepMs = opts.beepMs || 180; // length of each beep
+    var gapMs = opts.gapMs || 120; // silence between beeps
+    var freq = opts.freq || 880; // tone frequency (A5)
+
+    try {
+      var Ctx = GLOBAL.AudioContext || GLOBAL.webkitAudioContext;
+      if (!Ctx) return; // no WebAudio support
+      var ctx = new Ctx();
+
+      // Some browsers start the context suspended until a user gesture.
+      if (ctx.state === "suspended" && typeof ctx.resume === "function") {
+        try {
+          ctx.resume();
+        } catch (e) {
+          /* ignore */
+        }
+      }
+
+      var now = ctx.currentTime;
+      var step = (beepMs + gapMs) / 1000;
+      var dur = beepMs / 1000;
+
+      for (var i = 0; i < beeps; i++) {
+        var startAt = now + i * step;
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+
+        // Quick attack/decay envelope to avoid clicks.
+        gain.gain.setValueAtTime(0.0001, startAt);
+        gain.gain.exponentialRampToValueAtTime(0.25, startAt + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startAt + dur);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(startAt);
+        osc.stop(startAt + dur + 0.02);
+      }
+
+      // Close the context shortly after the last beep to free resources.
+      var totalMs = beeps * (beepMs + gapMs) + 300;
+      if (typeof setTimeout !== "undefined") {
+        setTimeout(function () {
+          try {
+            ctx.close();
+          } catch (e) {
+            /* ignore */
+          }
+        }, totalMs);
+      }
+    } catch (e) {
+      /* WebAudio failed — fire silently */
+    }
+  }
+
+  // Trigger device vibration if supported.
+  function vibrate(pattern) {
+    try {
+      if (
+        typeof navigator !== "undefined" &&
+        typeof navigator.vibrate === "function"
+      ) {
+        navigator.vibrate(pattern);
+      }
+    } catch (e) {
+      /* ignore */
+    }
+  }
+
+  // Show a notification if permission has been granted.
+  function showNotification(label, body, tag) {
+    try {
+      if (
+        typeof Notification !== "undefined" &&
+        Notification.permission === "granted"
+      ) {
+        return new Notification(label || "Alarm", {
+          body: body || "",
+          vibrate: [200, 100, 200],
+          tag: tag
+        });
+      }
+    } catch (e) {
+      /* notification construction can throw on some platforms */
+    }
+    return null;
+  }
+
+  // Does `alarm` apply on the weekday of `date`? days null/empty = every day.
+  function alarmMatchesDay(alarm, date) {
+    if (alarm.days == null) return true;
+    if (!Array.isArray(alarm.days) || alarm.days.length === 0) return true;
+    return alarm.days.indexOf(date.getDay()) !== -1;
+  }
+
+  var Alarms = {
+    // Callback the integrator may assign to react to a fired alarm.
+    onFire: null,
+
+    // Return the array of alarms (live reference to the cached list).
+    list: function () {
+      return loadAlarms();
+    },
+
+    // Create and persist a new alarm. Returns the created alarm object.
+    add: function (input) {
+      input = input || {};
+      var alarm = {
+        id: makeId(),
+        time: input.time || "00:00", // "HH:MM"
+        label: input.label || "Alarm",
+        enabled: true,
+        days: input.days != null ? input.days : null // null = every day
+      };
+      var list = loadAlarms();
+      list.push(alarm);
+      saveAlarms();
+      return alarm;
+    },
+
+    // Merge `patch` into the alarm with `id`. Returns the updated alarm or null.
+    update: function (id, patch) {
+      var list = loadAlarms();
+      for (var i = 0; i < list.length; i++) {
+        if (list[i].id === id) {
+          patch = patch || {};
+          for (var k in patch) {
+            if (Object.prototype.hasOwnProperty.call(patch, k) && k !== "id") {
+              list[i][k] = patch[k];
+            }
+          }
+          saveAlarms();
+          return list[i];
+        }
+      }
+      return null;
+    },
+
+    // Remove the alarm with `id`. Returns true if something was removed.
+    remove: function (id) {
+      var list = loadAlarms();
+      var before = list.length;
+      for (var i = list.length - 1; i >= 0; i--) {
+        if (list[i].id === id) list.splice(i, 1);
+      }
+      if (list.length !== before) {
+        saveAlarms();
+        return true;
+      }
+      return false;
+    },
+
+    // Flip the enabled flag. Returns the updated alarm or null.
+    toggle: function (id) {
+      var list = loadAlarms();
+      for (var i = 0; i < list.length; i++) {
+        if (list[i].id === id) {
+          list[i].enabled = !list[i].enabled;
+          saveAlarms();
+          return list[i];
+        }
+      }
+      return null;
+    },
+
+    // Ask for notification permission. Async; resolves to the permission string.
+    requestPermission: function () {
+      try {
+        if (typeof Notification === "undefined") {
+          return Promise.resolve("denied");
+        }
+        var result = Notification.requestPermission();
+        // Older API used a callback; normalise to a Promise either way.
+        if (result && typeof result.then === "function") {
+          return result;
+        }
+        return new Promise(function (resolve) {
+          try {
+            Notification.requestPermission(function (perm) {
+              resolve(perm);
+            });
+          } catch (e) {
+            resolve(Notification.permission || "default");
+          }
+        });
+      } catch (e) {
+        return Promise.resolve("denied");
+      }
+    },
+
+    /*
+     * Call this once per second with a Date.
+     * Fires any enabled alarm whose time/day matches the current minute,
+     * exactly once per minute (deduped via _firedThisMinute).
+     */
+    check: function (now) {
+      if (!(now instanceof Date)) now = new Date();
+      var hhmm = toHHMM(now);
+      // Stable minute key for dedupe (independent of locale formatting).
+      var minuteStamp =
+        now.getFullYear() +
+        "-" +
+        pad2(now.getMonth() + 1) +
+        "-" +
+        pad2(now.getDate()) +
+        "-" +
+        hhmm;
+
+      var list = loadAlarms();
+      for (var i = 0; i < list.length; i++) {
+        var alarm = list[i];
+        if (!alarm.enabled) continue;
+        if (alarm.time !== hhmm) continue;
+        if (!alarmMatchesDay(alarm, now)) continue;
+
+        var fireKey = alarm.id + "@" + minuteStamp;
+        if (_firedThisMinute.has(fireKey)) continue; // already fired this minute
+        _firedThisMinute.add(fireKey);
+
+        this._fire(alarm, now);
+      }
+
+      // Keep the dedupe set small: drop keys not from the current minute.
+      if (_firedThisMinute.size > 64) {
+        var keep = new Set();
+        _firedThisMinute.forEach(function (key) {
+          if (key.indexOf("@" + minuteStamp) !== -1) keep.add(key);
+        });
+        _firedThisMinute = keep;
+      }
+    },
+
+    // Internal: do the actual firing (notification + sound + vibrate + callback).
+    _fire: function (alarm, now) {
+      var label = alarm.label || "Alarm";
+      var body = "Alarm for " + alarm.time;
+
+      // Notification (guarded inside helper).
+      try {
+        showNotification(label, body, "pc-alarm-" + alarm.id);
+      } catch (e) {
+        /* ignore */
+      }
+
+      // Sound (guarded inside helper).
+      try {
+        playAlarmSound();
+      } catch (e) {
+        /* ignore */
+      }
+
+      // Vibrate (guarded inside helper).
+      try {
+        vibrate([200, 100, 200]);
+      } catch (e) {
+        /* ignore */
+      }
+
+      // Integrator UI callback.
+      try {
+        if (typeof this.onFire === "function") {
+          this.onFire(alarm, now || new Date());
+        }
+      } catch (e) {
+        /* never let a bad callback break alarm checking */
+      }
+    },
+
+    // Exposed for advanced/testing use.
+    _playSound: playAlarmSound
+  };
+
+  /* =======================================================================
+   * 2) Countdown
+   * ===================================================================== */
+
+  var Countdown = {
+    /*
+     * Pure: compute the breakdown from now -> targetDate.
+     * Accepts a Date or an ISO string. No side effects.
+     */
+    timeTill: function (targetDate) {
+      var target =
+        targetDate instanceof Date ? targetDate : new Date(targetDate);
+      var nowMs = Date.now();
+      var targetMs = target.getTime();
+      var diff = targetMs - nowMs;
+      var past = diff < 0;
+      var abs = Math.abs(diff);
+
+      var totalSeconds = Math.floor(abs / 1000);
+      var days = Math.floor(totalSeconds / 86400);
+      var hours = Math.floor((totalSeconds % 86400) / 3600);
+      var minutes = Math.floor((totalSeconds % 3600) / 60);
+      var seconds = totalSeconds % 60;
+
+      return {
+        days: days,
+        hours: hours,
+        minutes: minutes,
+        seconds: seconds,
+        totalMs: diff, // signed: negative when in the past
+        past: past
+      };
+    },
+
+    /*
+     * Format a parts object into "2d 03h 14m 09s".
+     * Leading zero units are omitted; smaller units are zero-padded once a
+     * larger unit is present. Always shows at least seconds.
+     */
+    format: function (parts) {
+      parts = parts || {};
+      var d = parts.days || 0;
+      var h = parts.hours || 0;
+      var m = parts.minutes || 0;
+      var s = parts.seconds || 0;
+
+      var out = [];
+      var started = false;
+
+      if (d > 0) {
+        out.push(d + "d");
+        started = true;
+      }
+      if (started || h > 0) {
+        out.push((started ? pad2(h) : h) + "h");
+        started = true;
+      }
+      if (started || m > 0) {
+        out.push((started ? pad2(m) : m) + "m");
+        started = true;
+      }
+      // Seconds always shown.
+      out.push((started ? pad2(s) : s) + "s");
+
+      return out.join(" ");
+    }
+  };
+
+  /* =======================================================================
+   * 3) GCal — Google Calendar deep links
+   * ===================================================================== */
+
+  // Format a Date as compact UTC "YYYYMMDDTHHMMSSZ" for Google Calendar.
+  function toGCalUTC(date) {
+    var d = date instanceof Date ? date : new Date(date);
+    return (
+      d.getUTCFullYear() +
+      pad2(d.getUTCMonth() + 1) +
+      pad2(d.getUTCDate()) +
+      "T" +
+      pad2(d.getUTCHours()) +
+      pad2(d.getUTCMinutes()) +
+      pad2(d.getUTCSeconds()) +
+      "Z"
+    );
+  }
+
+  // Compute the next occurrence (as a Date) of an alarm relative to baseDate.
+  function nextAlarmOccurrence(alarm, baseDate) {
+    var base = baseDate instanceof Date ? new Date(baseDate) : new Date();
+    var parts = String(alarm.time || "00:00").split(":");
+    var hh = parseInt(parts[0], 10) || 0;
+    var mm = parseInt(parts[1], 10) || 0;
+
+    // Candidate today at the alarm time.
+    var candidate = new Date(base);
+    candidate.setHours(hh, mm, 0, 0);
+
+    var validDay = function (date) {
+      if (alarm.days == null) return true;
+      if (!Array.isArray(alarm.days) || alarm.days.length === 0) return true;
+      return alarm.days.indexOf(date.getDay()) !== -1;
+    };
+
+    // Look ahead up to 8 days for the next valid, future occurrence.
+    for (var i = 0; i < 8; i++) {
+      if (candidate.getTime() > base.getTime() && validDay(candidate)) {
+        return candidate;
+      }
+      candidate = new Date(candidate);
+      candidate.setDate(candidate.getDate() + 1);
+      candidate.setHours(hh, mm, 0, 0);
+    }
+    // Fallback: tomorrow at the alarm time.
+    var fallback = new Date(base);
+    fallback.setDate(fallback.getDate() + 1);
+    fallback.setHours(hh, mm, 0, 0);
+    return fallback;
+  }
+
+  var GCal = {
+    /*
+     * Build a "create event" deep link. Opens Google Calendar prefilled —
+     * no API or auth required. Everything is URL-encoded.
+     */
+    eventLink: function (opts) {
+      opts = opts || {};
+      var start = opts.start instanceof Date ? opts.start : new Date(opts.start);
+
+      var end;
+      if (opts.end != null) {
+        end = opts.end instanceof Date ? opts.end : new Date(opts.end);
+      } else {
+        // Default duration: 25 minutes after start.
+        end = new Date(start.getTime() + 25 * 60 * 1000);
+      }
+
+      var params = [];
+      params.push("action=TEMPLATE");
+      params.push("text=" + encodeURIComponent(opts.title || ""));
+      params.push(
+        "dates=" +
+          encodeURIComponent(toGCalUTC(start) + "/" + toGCalUTC(end))
+      );
+      if (opts.details != null) {
+        params.push("details=" + encodeURIComponent(opts.details));
+      }
+      if (opts.location != null) {
+        params.push("location=" + encodeURIComponent(opts.location));
+      }
+
+      return (
+        "https://calendar.google.com/calendar/render?" + params.join("&")
+      );
+    },
+
+    /*
+     * Build a calendar event for an alarm's next occurrence, with a 0-minute
+     * duration and a popup reminder. This is the "fire when the app is closed"
+     * fallback — the user adds it to their real calendar.
+     */
+    alarmReminderLink: function (alarm, baseDate) {
+      alarm = alarm || {};
+      var occ = nextAlarmOccurrence(alarm, baseDate);
+      var params = [];
+      params.push("action=TEMPLATE");
+      params.push("text=" + encodeURIComponent(alarm.label || "Alarm"));
+      // Zero-minute duration: start == end.
+      params.push(
+        "dates=" + encodeURIComponent(toGCalUTC(occ) + "/" + toGCalUTC(occ))
+      );
+      params.push(
+        "details=" +
+          encodeURIComponent(
+            "Productivity Clock alarm reminder. Set a popup notification."
+          )
+      );
+      // Hint Google Calendar to attach a popup reminder at event time.
+      params.push("reminders=" + encodeURIComponent("popup,0"));
+
+      return (
+        "https://calendar.google.com/calendar/render?" + params.join("&")
+      );
+    },
+
+    // Exposed for testing/reuse.
+    _toGCalUTC: toGCalUTC,
+    _nextAlarmOccurrence: nextAlarmOccurrence
+  };
+
+  /* =======================================================================
+   * Publish globals
+   * ===================================================================== */
+
+  GLOBAL.Alarms = Alarms;
+  GLOBAL.Countdown = Countdown;
+  GLOBAL.GCal = GCal;
+})();
+
+</script>
+  <script>
+/**
+ * app.js — Productivity Time controller / integrator.
+ *
+ * Wires the four specialist modules together:
+ *   ClockEngine (clock.js) · PC_THEMES (themes.js) · Alarms/Countdown/GCal (features.js)
+ *
+ * Vanilla JS, no build step. Owns: view + theme + direction state, the rAF
+ * tick loop, the Tools sheet (alarms + "time till"), persistence, PWA install,
+ * and service-worker registration.
+ */
+(function () {
+  'use strict';
+
+  // ---- Element lookups ----------------------------------------------------
+  var $ = function (id) { return document.getElementById(id); };
+
+  var root        = $('pc-root');
+  var svg         = $('pc-analog');
+  var digital     = $('pc-digital');
+  var digitalTime = $('pc-digital-time');
+  var digitalMeta = $('pc-digital-meta');
+
+  var viewToggle  = $('pc-view-toggle');
+  var directionEl = $('pc-direction');
+  var themeEl     = $('pc-theme');
+  var toolsBtn    = $('pc-tools-btn');
+  var installBtn  = $('pc-install');
+
+  var sheet       = $('pc-sheet');
+  var backdrop    = $('pc-sheet-backdrop');
+  var sheetClose  = $('pc-sheet-close');
+
+  var notifBtn    = $('pc-notif-btn');
+  var alarmTime   = $('pc-alarm-time');
+  var alarmLabel  = $('pc-alarm-label');
+  var alarmAdd    = $('pc-alarm-add');
+  var alarmList   = $('pc-alarm-list');
+
+  var tillTarget  = $('pc-till-target');
+  var tillDisplay = $('pc-till-display');
+  var tillGcal    = $('pc-till-gcal');
+
+  var toast       = $('pc-toast');
+  var themeColorMeta = $('pc-theme-color');
+
+  // ---- Settings persistence ----------------------------------------------
+  var SETTINGS_KEY = 'pc_settings';
+  var DEFAULTS = { view: 'analog', direction: 'reverseSeconds', theme: 'focus' };
+
+  function loadSettings() {
+    try {
+      var raw = localStorage.getItem(SETTINGS_KEY);
+      if (!raw) return Object.assign({}, DEFAULTS);
+      return Object.assign({}, DEFAULTS, JSON.parse(raw));
+    } catch (e) {
+      return Object.assign({}, DEFAULTS);
+    }
+  }
+
+  function saveSettings() {
+    try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) {}
+  }
+
+  var settings = loadSettings();
+
+  // ---- Direction → ClockEngine opts --------------------------------------
+  function dirOpts() {
+    if (settings.direction === 'reverseAll') return { reverseAll: true };
+    if (settings.direction === 'reverseSeconds') return { reverseSeconds: true };
+    return {};
+  }
+
+  // ---- Theme --------------------------------------------------------------
+  function populateThemes() {
+    var themes = (typeof window !== 'undefined' && window.PC_THEMES) || [{ id: 'focus', name: 'Deep Focus' }];
+    themeEl.innerHTML = '';
+    themes.forEach(function (t) {
+      var opt = document.createElement('option');
+      opt.value = t.id;
+      opt.textContent = t.name;
+      themeEl.appendChild(opt);
+    });
+    // Guard against a saved theme that no longer exists.
+    if (!themes.some(function (t) { return t.id === settings.theme; })) {
+      settings.theme = themes[0].id;
+    }
+    themeEl.value = settings.theme;
+  }
+
+  function applyTheme(id) {
+    settings.theme = id;
+    root.className = 'pc-root theme-' + id;
+    // Sync the browser/OS chrome color to the theme background.
+    try {
+      var bg = getComputedStyle(root).getPropertyValue('--pc-bg').trim();
+      if (bg && themeColorMeta) themeColorMeta.setAttribute('content', bg);
+    } catch (e) {}
+    saveSettings();
+  }
+
+  // ---- View (analog / digital) -------------------------------------------
+  function applyView(view) {
+    settings.view = view;
+    var isAnalog = view === 'analog';
+    svg.hidden = !isAnalog;
+    digital.hidden = isAnalog;
+    // Button shows the destination, not the current state.
+    viewToggle.textContent = isAnalog ? 'Digital' : 'Analog';
+    saveSettings();
+  }
+
+  // ---- The tick loop ------------------------------------------------------
+  var lastSecond = -1;
+
+  function frame() {
+    var now = new Date();
+    var opts = dirOpts();
+
+    if (settings.view === 'analog') {
+      ClockEngine.updateAnalog(now, opts);
+    }
+
+    var sec = now.getSeconds();
+    if (sec !== lastSecond) {
+      lastSecond = sec;
+
+      // Digital readout (updates once per second is plenty).
+      if (settings.view === 'digital') {
+        var f = ClockEngine.formatDigital(now, opts);
+        digitalTime.textContent = f.display;
+        digitalMeta.textContent = formatMeta(now, f);
+      }
+
+      // Alarm engine: check every second.
+      if (window.Alarms && typeof window.Alarms.check === 'function') {
+        window.Alarms.check(now);
+      }
+
+      // Live countdown, if a target is set and the sheet is open.
+      updateTill(now);
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  function formatMeta(now, f) {
+    var date = now.toLocaleDateString(undefined, {
+      weekday: 'short', month: 'short', day: 'numeric'
+    });
+    return date + ' · ' + f.ampm;
+  }
+
+  // ---- Tools sheet --------------------------------------------------------
+  function openSheet() {
+    backdrop.hidden = false;
+    sheet.hidden = false;
+    renderAlarms();
+    updateTill(new Date());
+  }
+  function closeSheet() {
+    backdrop.hidden = true;
+    sheet.hidden = true;
+  }
+
+  // ---- Alarms UI ----------------------------------------------------------
+  function renderAlarms() {
+    if (!window.Alarms) return;
+    var items = window.Alarms.list();
+    alarmList.innerHTML = '';
+
+    if (!items.length) {
+      var empty = document.createElement('li');
+      empty.className = 'pc-empty';
+      empty.textContent = 'No alarms yet. Add one above.';
+      alarmList.appendChild(empty);
+      return;
+    }
+
+    items.forEach(function (a) {
+      var li = document.createElement('li');
+      li.className = 'pc-list-item' + (a.enabled ? '' : ' pc-alarm-off');
+
+      var meta = document.createElement('div');
+      meta.className = 'pc-alarm-meta';
+      var time = document.createElement('span');
+      time.className = 'pc-alarm-time';
+      time.textContent = a.time;
+      var label = document.createElement('span');
+      label.className = 'pc-alarm-label';
+      label.textContent = a.label || 'Alarm';
+      meta.appendChild(time);
+      meta.appendChild(label);
+
+      var toggle = document.createElement('button');
+      toggle.className = 'pc-icon-btn';
+      toggle.type = 'button';
+      toggle.textContent = a.enabled ? 'On' : 'Off';
+      toggle.addEventListener('click', function () {
+        window.Alarms.toggle(a.id);
+        renderAlarms();
+      });
+
+      var gcal = document.createElement('a');
+      gcal.className = 'pc-icon-btn';
+      gcal.textContent = '📅';
+      gcal.title = 'Add to Google Calendar (fires even when app is closed)';
+      gcal.target = '_blank';
+      gcal.rel = 'noopener';
+      try { gcal.href = window.GCal.alarmReminderLink(a, new Date()); } catch (e) { gcal.href = '#'; }
+
+      var del = document.createElement('button');
+      del.className = 'pc-icon-btn';
+      del.type = 'button';
+      del.textContent = '✕';
+      del.setAttribute('aria-label', 'Delete alarm');
+      del.addEventListener('click', function () {
+        window.Alarms.remove(a.id);
+        renderAlarms();
+      });
+
+      li.appendChild(meta);
+      li.appendChild(toggle);
+      li.appendChild(gcal);
+      li.appendChild(del);
+      alarmList.appendChild(li);
+    });
+  }
+
+  function addAlarm() {
+    if (!window.Alarms) return;
+    var t = (alarmTime.value || '').trim();
+    if (!t) { showToast('Pick a time first'); return; }
+    window.Alarms.add({ time: t, label: (alarmLabel.value || '').trim(), days: null });
+    alarmLabel.value = '';
+    // Nudge for notification permission on first alarm.
+    if (window.Notification && Notification.permission === 'default') {
+      window.Alarms.requestPermission();
+    }
+    renderAlarms();
+    showToast('Alarm set for ' + t);
+  }
+
+  // ---- "How much time till" ----------------------------------------------
+  function currentTarget() {
+    if (!tillTarget.value) return null;
+    var d = new Date(tillTarget.value);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  function updateTill(now) {
+    if (sheet.hidden || !window.Countdown) return;
+    var target = currentTarget();
+    if (!target) { tillDisplay.textContent = '—'; tillGcal.setAttribute('aria-disabled', 'true'); return; }
+
+    var parts = window.Countdown.timeTill(target);
+    tillDisplay.textContent = parts.past ? 'That moment has passed' : window.Countdown.format(parts);
+
+    try {
+      tillGcal.href = window.GCal.eventLink({
+        title: 'Countdown target',
+        start: target,
+        details: 'Created in Productivity Time'
+      });
+      tillGcal.setAttribute('aria-disabled', 'false');
+    } catch (e) {
+      tillGcal.setAttribute('aria-disabled', 'true');
+    }
+  }
+
+  // ---- Toast --------------------------------------------------------------
+  var toastTimer = null;
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.hidden = false;
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toast.hidden = true; }, 2600);
+  }
+
+  // ---- PWA install + service worker --------------------------------------
+  var deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.hidden = false;
+  });
+  installBtn.addEventListener('click', function () {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.finally(function () {
+      deferredPrompt = null;
+      installBtn.hidden = true;
+    });
+  });
+  window.addEventListener('appinstalled', function () { installBtn.hidden = true; });
+
+  function registerSW() {
+    if (false) { // SW disabled in standalone single-file build
+      // Relative path so it works under /productivity-clock/.
+      navigator.serviceWorker.register('sw.js').catch(function (e) {
+        console.warn('SW registration failed:', e);
+      });
+    }
+  }
+
+  // ---- Wire events --------------------------------------------------------
+  viewToggle.addEventListener('click', function () {
+    applyView(settings.view === 'analog' ? 'digital' : 'analog');
+    // Refresh digital immediately so it doesn't wait a second.
+    if (settings.view === 'digital') {
+      var f = ClockEngine.formatDigital(new Date(), dirOpts());
+      digitalTime.textContent = f.display;
+      digitalMeta.textContent = formatMeta(new Date(), f);
+    }
+  });
+
+  directionEl.addEventListener('change', function () {
+    settings.direction = directionEl.value;
+    saveSettings();
+  });
+
+  themeEl.addEventListener('change', function () { applyTheme(themeEl.value); });
+
+  toolsBtn.addEventListener('click', openSheet);
+  sheetClose.addEventListener('click', closeSheet);
+  backdrop.addEventListener('click', closeSheet);
+
+  notifBtn.addEventListener('click', function () {
+    if (!window.Alarms) return;
+    window.Alarms.requestPermission().then(function (p) {
+      showToast(p === 'granted' ? 'Notifications enabled' : 'Notifications: ' + p);
+    });
+  });
+
+  alarmAdd.addEventListener('click', addAlarm);
+  tillTarget.addEventListener('change', function () { updateTill(new Date()); });
+
+  if (window.Alarms) {
+    window.Alarms.onFire = function (a) {
+      showToast('⏰ ' + (a.label || 'Alarm') + ' — ' + a.time);
+      if (!sheet.hidden) renderAlarms();
+    };
+  }
+
+  // ---- Boot ---------------------------------------------------------------
+  function init() {
+    ClockEngine.buildAnalog(svg);
+    populateThemes();
+    applyTheme(settings.theme);
+    directionEl.value = settings.direction;
+    applyView(settings.view);
+    registerSW();
+    requestAnimationFrame(frame);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+
+</script>
+</body>
+</html>
