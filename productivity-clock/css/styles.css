@@ -1,0 +1,479 @@
+/* ==========================================================================
+   Productivity Clock — styles.css
+   Mobile-first (Android) vanilla PWA clock. Clean, minimal "productivity"
+   aesthetic. Themes set CSS custom properties on .pc-root.theme-<id>.
+   ========================================================================== */
+
+/* ---------- Reset / base ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  /* avoid pull-to-refresh / rubber-banding fighting the fixed layout */
+  overscroll-behavior: none;
+  background: var(--pc-bg, #16181d);
+}
+
+/* Sensible default sans stack (overridden per-theme via --pc-font). */
+:root {
+  --pc-font-sans: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Inter,
+    system-ui, sans-serif;
+  --pc-font-mono: ui-monospace, "Cascadia Code", "JetBrains Mono", Consolas,
+    monospace;
+
+  /* layout tokens */
+  --pc-tap: 48px;        /* thumb-friendly minimum (>=44px) */
+  --pc-radius: 14px;
+  --pc-gap: 16px;
+  --pc-maxw: 560px;
+
+  /* fallbacks so anything renders before a theme class lands */
+  --pc-bg: #16181d;
+  --pc-surface: #1e2129;
+  --pc-text: #e9ecf1;
+  --pc-muted: #8a90a0;
+  --pc-accent: #f5a623;
+  --pc-face: #1e2129;
+  --pc-tick: #555c6b;
+  --pc-hour: #e9ecf1;
+  --pc-minute: #e9ecf1;
+  --pc-second: #f5a623;
+  --pc-font: var(--pc-font-sans);
+}
+
+/* ==========================================================================
+   THEMES — each sets every required variable.
+   ========================================================================== */
+
+/* Deep Focus — dark charcoal, soft white, amber accent */
+.pc-root.theme-focus {
+  --pc-bg: #16181d;
+  --pc-surface: #21242d;
+  --pc-text: #eceef3;
+  --pc-muted: #888fa1;
+  --pc-accent: #f5a623;
+  --pc-face: #1c1f27;
+  --pc-tick: #4a505e;
+  --pc-hour: #eceef3;
+  --pc-minute: #eceef3;
+  --pc-second: #f5a623;
+  --pc-font: var(--pc-font-sans);
+}
+
+/* Paper — warm off-white, near-black text, blue accent, very minimal */
+.pc-root.theme-paper {
+  --pc-bg: #f6f3ec;
+  --pc-surface: #fffdf8;
+  --pc-text: #1b1b1a;
+  --pc-muted: #6f6c64;
+  --pc-accent: #2f6fed;
+  --pc-face: #fffdf8;
+  --pc-tick: #c9c4b8;
+  --pc-hour: #1b1b1a;
+  --pc-minute: #1b1b1a;
+  --pc-second: #2f6fed;
+  --pc-font: var(--pc-font-sans);
+}
+
+/* Terminal — black bg, phosphor green mono everything */
+.pc-root.theme-terminal {
+  --pc-bg: #000000;
+  --pc-surface: #0a120a;
+  --pc-text: #33ff66;
+  --pc-muted: #1f9b43;
+  --pc-accent: #66ff99;
+  --pc-face: #050a05;
+  --pc-tick: #1c6b34;
+  --pc-hour: #33ff66;
+  --pc-minute: #33ff66;
+  --pc-second: #66ff99;
+  --pc-font: var(--pc-font-mono);
+}
+
+/* Nord — cool slate/blue palette */
+.pc-root.theme-nord {
+  --pc-bg: #2e3440;
+  --pc-surface: #3b4252;
+  --pc-text: #eceff4;
+  --pc-muted: #9aa4b8;
+  --pc-accent: #88c0d0;
+  --pc-face: #353b48;
+  --pc-tick: #4c566a;
+  --pc-hour: #eceff4;
+  --pc-minute: #d8dee9;
+  --pc-second: #88c0d0;
+  --pc-font: var(--pc-font-sans);
+}
+
+/* Warm — solarized-style warm light */
+.pc-root.theme-warm {
+  --pc-bg: #fdf6e3;
+  --pc-surface: #fffaf0;
+  --pc-text: #586e75;
+  --pc-muted: #93a1a1;
+  --pc-accent: #cb4b16;
+  --pc-face: #fbf1d7;
+  --pc-tick: #d9cda7;
+  --pc-hour: #586e75;
+  --pc-minute: #657b83;
+  --pc-second: #cb4b16;
+  --pc-font: var(--pc-font-sans);
+}
+
+/* ==========================================================================
+   ROOT LAYOUT — full-screen flex column, theme vars applied.
+   ========================================================================== */
+
+.pc-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh; /* dynamic viewport for Android browser chrome */
+  width: 100%;
+  margin: 0 auto;
+  max-width: var(--pc-maxw);
+
+  background-color: var(--pc-bg);
+  color: var(--pc-text);
+  font-family: var(--pc-font);
+  font-size: 16px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+
+  /* safe-area aware padding (Android notches / gesture bar) */
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+
+  /* subtle, smooth theme-change transition */
+  transition: background-color 0.35s ease, color 0.35s ease;
+}
+
+/* ---------- Clock area: centered, fills the space above the menu ---------- */
+.pc-clock-area {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: var(--pc-gap);
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   ANALOG CLOCK — SVG #pc-analog. Hand colors driven by theme vars.
+   ========================================================================== */
+
+#pc-analog {
+  display: block;
+  width: min(78vw, 78vh, 420px);
+  height: auto;
+  aspect-ratio: 1 / 1;
+  transition: filter 0.35s ease;
+}
+
+/* Conventional class hooks for SVG children so JS can render simple shapes
+   and inherit theme colors without inline styles. */
+#pc-analog .pc-face {
+  fill: var(--pc-face);
+  stroke: var(--pc-tick);
+  stroke-width: 1;
+  transition: fill 0.35s ease, stroke 0.35s ease;
+}
+
+#pc-analog .pc-tick {
+  stroke: var(--pc-tick);
+  stroke-linecap: round;
+  transition: stroke 0.35s ease;
+}
+
+#pc-analog .pc-tick--major {
+  stroke: var(--pc-muted);
+}
+
+#pc-analog .pc-numeral {
+  fill: var(--pc-muted);
+  font-family: var(--pc-font);
+  font-size: 7px;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+#pc-analog .pc-hand {
+  stroke-linecap: round;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: stroke 0.35s ease;
+}
+
+#pc-analog .pc-hand-hour {
+  stroke: var(--pc-hour);
+  stroke-width: 5;
+}
+
+#pc-analog .pc-hand-minute {
+  stroke: var(--pc-minute);
+  stroke-width: 3.25;
+}
+
+/* Seconds hand: thinner + accent color, visually distinct */
+#pc-analog .pc-hand-second {
+  stroke: var(--pc-second);
+  stroke-width: 1.25;
+}
+
+#pc-analog .pc-cap {
+  fill: var(--pc-second);
+  stroke: var(--pc-face);
+  stroke-width: 1;
+}
+
+/* ==========================================================================
+   DIGITAL CLOCK — big tabular readout.
+   ========================================================================== */
+
+.pc-digital {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.4em;
+  width: 100%;
+}
+
+.pc-digital-time {
+  font-family: var(--pc-font);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  color: var(--pc-text);
+  /* fluid + huge, capped so it never overflows narrow phones */
+  font-size: clamp(3.5rem, 22vw, 7.5rem);
+  transition: color 0.35s ease;
+}
+
+.pc-digital-meta {
+  font-family: var(--pc-font);
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(0.95rem, 4.5vw, 1.35rem);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pc-muted);
+  transition: color 0.35s ease;
+}
+
+/* Terminal theme: a touch of glow for the phosphor look */
+.pc-root.theme-terminal .pc-digital-time {
+  text-shadow: 0 0 12px rgba(51, 255, 102, 0.35);
+}
+
+/* ==========================================================================
+   BOTTOM MENU — thumb-friendly control bar with subtle backdrop.
+   ========================================================================== */
+
+.pc-menu {
+  flex: 0 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--pc-gap);
+  width: 100%;
+  padding: var(--pc-gap);
+  /* keep clear of the Android gesture bar */
+  padding-bottom: calc(var(--pc-gap) + env(safe-area-inset-bottom, 0px));
+
+  background-color: color-mix(in srgb, var(--pc-surface) 88%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
+  backdrop-filter: blur(14px) saturate(120%);
+  border-top: 1px solid color-mix(in srgb, var(--pc-text) 10%, transparent);
+
+  transition: background-color 0.35s ease, border-color 0.35s ease;
+}
+
+/* Fallback for engines without color-mix(): solid surface. */
+@supports not (background: color-mix(in srgb, red, blue)) {
+  .pc-menu {
+    background-color: var(--pc-surface);
+    border-top: 1px solid var(--pc-tick);
+  }
+}
+
+/* ==========================================================================
+   GENERIC CONTROLS — buttons, selects, inputs, cards, lists.
+   ========================================================================== */
+
+.pc-btn,
+.pc-select,
+.pc-input {
+  min-height: var(--pc-tap);
+  font-family: var(--pc-font);
+  font-size: 1rem;
+  color: var(--pc-text);
+  background-color: var(--pc-surface);
+  border: 1px solid color-mix(in srgb, var(--pc-text) 14%, transparent);
+  border-radius: var(--pc-radius);
+  padding: 0 16px;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  transition: background-color 0.2s ease, border-color 0.2s ease,
+    color 0.2s ease, transform 0.05s ease;
+}
+
+.pc-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: var(--pc-tap);
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.pc-btn:active {
+  transform: scale(0.97);
+}
+
+/* Primary / accented button */
+.pc-btn--primary {
+  background-color: var(--pc-accent);
+  border-color: var(--pc-accent);
+  color: var(--pc-bg);
+}
+
+/* Ghost button — minimal, text-only */
+.pc-btn--ghost {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--pc-muted);
+}
+
+.pc-btn--ghost:active {
+  color: var(--pc-text);
+}
+
+.pc-select {
+  /* leave room for the native dropdown arrow we draw below */
+  padding-right: 40px;
+  background-image: linear-gradient(45deg, transparent 50%, var(--pc-muted) 50%),
+    linear-gradient(135deg, var(--pc-muted) 50%, transparent 50%);
+  background-position: calc(100% - 18px) center, calc(100% - 13px) center;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+.pc-input::placeholder {
+  color: var(--pc-muted);
+}
+
+/* Focus ring (keyboard accessibility, also useful on Android phys. kbd) */
+.pc-btn:focus-visible,
+.pc-select:focus-visible,
+.pc-input:focus-visible {
+  border-color: var(--pc-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pc-accent) 35%, transparent);
+}
+
+/* ---------- Card ---------- */
+.pc-card {
+  background-color: var(--pc-surface);
+  color: var(--pc-text);
+  border: 1px solid color-mix(in srgb, var(--pc-text) 8%, transparent);
+  border-radius: var(--pc-radius);
+  padding: var(--pc-gap);
+  transition: background-color 0.35s ease, border-color 0.35s ease;
+}
+
+/* ---------- List ---------- */
+.pc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.pc-list-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--pc-tap);
+  padding: 10px 14px;
+  color: var(--pc-text);
+  border-bottom: 1px solid color-mix(in srgb, var(--pc-text) 8%, transparent);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pc-list-item:last-child {
+  border-bottom: none;
+}
+
+.pc-list-item--active {
+  color: var(--pc-accent);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   RESPONSIVE — give larger phones / landscape more breathing room.
+   ========================================================================== */
+
+@media (min-width: 480px) {
+  .pc-root {
+    font-size: 17px;
+  }
+  .pc-menu {
+    flex-wrap: nowrap;
+    justify-content: center;
+  }
+}
+
+/* Landscape: place analog/digital and menu side-considerations — keep menu
+   compact so the clock stays the focus. */
+@media (orientation: landscape) and (max-height: 480px) {
+  .pc-clock-area {
+    padding: 8px;
+  }
+  #pc-analog {
+    width: min(60vh, 320px);
+  }
+  .pc-digital-time {
+    font-size: clamp(3rem, 16vh, 6rem);
+  }
+  .pc-menu {
+    padding: 8px calc(8px + env(safe-area-inset-right, 0px)) 8px
+      calc(8px + env(safe-area-inset-left, 0px));
+  }
+}
+
+/* ==========================================================================
+   MOTION — honor reduced-motion users (disables theme/hand transitions).
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.001ms !important;
+  }
+}
