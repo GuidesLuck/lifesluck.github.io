@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#16181d" id="pc-theme-color" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="description" content="A productivity clock whose second hand counts down to the next minute." />
+  <title>Productivity Time</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    /* Integrator-owned UI: the Tools sheet + a few helpers, built on the
+       design system's tokens/vars so it inherits every theme automatically. */
+    .pc-sheet-backdrop {
+      position: fixed; inset: 0; z-index: 40;
+      background: rgba(0, 0, 0, 0.5);
+      -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
+    }
+    .pc-sheet {
+      position: fixed; left: 50%; bottom: 0; z-index: 50;
+      transform: translateX(-50%);
+      width: 100%; max-width: var(--pc-maxw);
+      max-height: 86dvh; overflow-y: auto;
+      display: flex; flex-direction: column; gap: var(--pc-gap);
+      padding: var(--pc-gap);
+      padding-bottom: calc(var(--pc-gap) + env(safe-area-inset-bottom, 0px));
+      background: var(--pc-bg); color: var(--pc-text);
+      border-top-left-radius: 20px; border-top-right-radius: 20px;
+      border: 1px solid color-mix(in srgb, var(--pc-text) 12%, transparent);
+      box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.45);
+    }
+    .pc-sheet[hidden], .pc-sheet-backdrop[hidden] { display: none; }
+    .pc-sheet-head { display: flex; align-items: center; justify-content: space-between; }
+    .pc-sheet-head h2 { margin: 0; font-size: 1.25rem; }
+    .pc-card h3 { margin: 0 0 12px; font-size: 1.05rem; color: var(--pc-text); }
+    .pc-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+    .pc-row .pc-input { flex: 1 1 120px; min-width: 0; }
+    .pc-till-display {
+      font-variant-numeric: tabular-nums; font-weight: 600;
+      font-size: clamp(1.5rem, 9vw, 2.4rem); text-align: center;
+      color: var(--pc-accent); margin: 12px 0;
+    }
+    .pc-alarm-meta { display: flex; flex-direction: column; flex: 1 1 auto; min-width: 0; }
+    .pc-alarm-time { font-weight: 700; font-variant-numeric: tabular-nums; }
+    .pc-alarm-label { color: var(--pc-muted); font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pc-alarm-off .pc-alarm-time, .pc-alarm-off .pc-alarm-label { opacity: 0.4; }
+    .pc-icon-btn {
+      min-width: 40px; min-height: 40px; padding: 0 10px;
+      border-radius: 10px; border: 1px solid color-mix(in srgb, var(--pc-text) 14%, transparent);
+      background: var(--pc-surface); color: var(--pc-text); cursor: pointer; font-size: 0.85rem;
+    }
+    .pc-empty { color: var(--pc-muted); font-size: 0.9rem; padding: 8px 0; }
+    .pc-toast {
+      position: fixed; left: 50%; top: calc(12px + env(safe-area-inset-top, 0px));
+      transform: translateX(-50%); z-index: 60;
+      background: var(--pc-accent); color: var(--pc-bg);
+      font-weight: 700; padding: 12px 18px; border-radius: var(--pc-radius);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); max-width: 90vw;
+    }
+    .pc-toast[hidden] { display: none; }
+    a.pc-btn { text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="pc-root theme-focus" id="pc-root">
+    <main class="pc-clock-area" id="pc-clock-area">
+      <svg id="pc-analog" viewBox="0 0 200 200" role="img" aria-label="Analog clock"></svg>
+      <div class="pc-digital" id="pc-digital" hidden>
+        <div class="pc-digital-time" id="pc-digital-time">00:00:00</div>
+        <div class="pc-digital-meta" id="pc-digital-meta"></div>
+      </div>
+    </main>
+
+    <nav class="pc-menu" id="pc-menu">
+      <button class="pc-btn" id="pc-view-toggle" type="button">Digital</button>
+      <select class="pc-select" id="pc-direction" aria-label="Hand direction">
+        <option value="normal">Normal</option>
+        <option value="reverseSeconds">Reverse seconds</option>
+        <option value="reverseAll">Reverse all</option>
+      </select>
+      <select class="pc-select" id="pc-theme" aria-label="Theme"></select>
+      <button class="pc-btn" id="pc-tools-btn" type="button">Tools</button>
+      <button class="pc-btn pc-btn--primary" id="pc-install" type="button" hidden>Install</button>
+    </nav>
+  </div>
+
+  <div class="pc-sheet-backdrop" id="pc-sheet-backdrop" hidden></div>
+  <aside class="pc-sheet" id="pc-sheet" hidden aria-label="Tools">
+    <div class="pc-sheet-head">
+      <h2>Tools</h2>
+      <button class="pc-btn pc-btn--ghost" id="pc-sheet-close" type="button">Close</button>
+    </div>
+
+    <section class="pc-card">
+      <h3>Alarms</h3>
+      <button class="pc-btn pc-btn--ghost" id="pc-notif-btn" type="button">Enable notifications</button>
+      <div class="pc-row" style="margin-top:12px">
+        <input class="pc-input" id="pc-alarm-time" type="time" aria-label="Alarm time" />
+        <input class="pc-input" id="pc-alarm-label" type="text" placeholder="Label (optional)" aria-label="Alarm label" />
+        <button class="pc-btn pc-btn--primary" id="pc-alarm-add" type="button">Add</button>
+      </div>
+      <ul class="pc-list" id="pc-alarm-list"></ul>
+    </section>
+
+    <section class="pc-card">
+      <h3>How much time till…</h3>
+      <input class="pc-input" id="pc-till-target" type="datetime-local" aria-label="Target date and time" style="width:100%" />
+      <div class="pc-till-display" id="pc-till-display">—</div>
+      <a class="pc-btn pc-btn--primary" id="pc-till-gcal" target="_blank" rel="noopener" aria-disabled="true">Add to Google Calendar</a>
+    </section>
+  </aside>
+
+  <div class="pc-toast" id="pc-toast" hidden></div>
+
+  <script src="js/themes.js"></script>
+  <script src="js/clock.js"></script>
+  <script src="js/features.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Productivity Time clock icon">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2c2c2e"/>
+      <stop offset="1" stop-color="#1c1c1e"/>
+    </linearGradient>
+    <linearGradient id="hand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ff453a"/>
+      <stop offset="1" stop-color="#ff6b61"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Dark rounded square background -->
+  <rect x="0" y="0" width="512" height="512" rx="112" ry="112" fill="url(#bg)"/>
+
+  <!-- Outer clock ring -->
+  <circle cx="256" cy="256" r="168" fill="none" stroke="#3a3a3c" stroke-width="14"/>
+  <circle cx="256" cy="256" r="168" fill="#1c1c1e"/>
+
+  <!-- Hour tick marks -->
+  <g stroke="#8e8e93" stroke-width="10" stroke-linecap="round">
+    <line x1="256" y1="108" x2="256" y2="138"/>
+    <line x1="256" y1="374" x2="256" y2="404"/>
+    <line x1="108" y1="256" x2="138" y2="256"/>
+    <line x1="374" y1="256" x2="404" y2="256"/>
+  </g>
+  <g stroke="#5a5a5e" stroke-width="6" stroke-linecap="round">
+    <line x1="330" y1="128" x2="345" y2="154"/>
+    <line x1="384" y1="182" x2="358" y2="197"/>
+    <line x1="384" y1="330" x2="358" y2="315"/>
+    <line x1="330" y1="384" x2="345" y2="358"/>
+    <line x1="182" y1="384" x2="167" y2="358"/>
+    <line x1="128" y1="330" x2="154" y2="315"/>
+    <line x1="128" y1="182" x2="154" y2="197"/>
+    <line x1="182" y1="128" x2="167" y2="154"/>
+  </g>
+
+  <!-- Hour hand pointing up -->
+  <line x1="256" y1="256" x2="256" y2="170" stroke="#f2f2f7" stroke-width="16" stroke-linecap="round"/>
+  <!-- Minute hand -->
+  <line x1="256" y1="256" x2="336" y2="200" stroke="#f2f2f7" stroke-width="12" stroke-linecap="round"/>
+
+  <!-- Second hand (countdown vibe), red, pointing toward 8 o'clock sweep -->
+  <line x1="256" y1="256" x2="188" y2="332" stroke="url(#hand)" stroke-width="8" stroke-linecap="round"/>
+  <!-- Counterweight tail -->
+  <line x1="256" y1="256" x2="274" y2="236" stroke="url(#hand)" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- Center cap -->
+  <circle cx="256" cy="256" r="16" fill="#ff453a"/>
+  <circle cx="256" cy="256" r="7" fill="#1c1c1e"/>
+</svg>
